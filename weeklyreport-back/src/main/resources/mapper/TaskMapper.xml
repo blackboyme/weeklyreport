@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caac.weeklyreport.mapper.TaskMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.caac.weeklyreport.entity.Task">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="title" property="title" />
+        <result column="description" property="description" />
+        <result column="important" property="important" />
+        <result column="archived" property="archived" />
+        <result column="completed" property="completed" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, title, description, important, archived, completed, created_at, updated_at
+    </sql>
+
+    <!-- 根据用户ID查找任务 -->
+    <select id="findTasksByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM task
+        WHERE user_id = #{userId}
+    </select>
+    
+</mapper>
