@@ -2,6 +2,7 @@ package com.caac.weeklyreport.controller;
 
 import com.caac.weeklyreport.entity.User;
 import com.caac.weeklyreport.service.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
-        user.setId(id);
+        user.setUserId(id);
         User updatedUser = userService.updateUser(user);
         return updatedUser != null ? ResponseEntity.ok(updatedUser) : ResponseEntity.notFound().build();
     }
@@ -53,14 +54,13 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
-        String name = loginRequest.get("name");
-        String password = loginRequest.get("password");
+        String phoneNo = loginRequest.get("phoneNo");
         
-        if (name == null || password == null) {
-            return ResponseEntity.badRequest().body("用户名和密码不能为空");
+        if (StringUtils.isEmpty(phoneNo)) {
+            return ResponseEntity.badRequest().body("手机号不能为空");
         }
 
-        User user = userService.login(name, password);
+        User user = userService.login(phoneNo);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {

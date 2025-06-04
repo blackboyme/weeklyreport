@@ -1,15 +1,24 @@
 server:
-  port: 8090
+  port: 8080
+  servlet:
+    context-path: /weeklyreport
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/tododb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: todousr
-    password: Hanrenjie123!
-  security:
-    user:
-      name: user
-      password: disabled
+  application:
+    name: weeklyreport
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  profiles:
+    active: dev
+
+# ===== 自定义swagger配置 ===== #
+swagger:
+  enable: true
+  application-name: ${spring.application.name}
+  application-version: 1.0
+  application-description: springfox swagger 3.0整合Demo
+  try-host: http://localhost:${server.port}
+
 
 mybatis-plus:
   configuration:

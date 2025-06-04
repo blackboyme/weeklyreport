@@ -6,6 +6,6 @@
     </select>
 
     <select id="login" resultType="com.caac.weeklyreport.entity.User">
-        SELECT * FROM user WHERE name = #{name} AND password = #{password} AND deleted = '0'
+        SELECT * FROM user WHERE phone_no = #{phoneNo} AND is_deleted = '0'
     </select>
 </mapper>

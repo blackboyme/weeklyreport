@@ -1,6 +1,7 @@
 package com.caac.weeklyreport.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.entity.User;
 import com.caac.weeklyreport.mapper.UserMapper;
 import com.caac.weeklyreport.service.UserService;
@@ -10,8 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
-@Service
-public class UserServiceImpl implements UserService {
+@Service("userService")
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
 
     private final UserMapper userMapper;
 
@@ -21,10 +22,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
-        user.setId(UUID.randomUUID().toString());
-        user.setDeleted("0");
+        user.setUserId(UUID.randomUUID().toString());
+        user.setIsDeleted("0");
         userMapper.insert(user);
-        return getUserById(user.getId());
+        return getUserById(user.getRoleId());
     }
 
     @Override
@@ -35,36 +36,35 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllUsers() {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("deleted", "0");
+        queryWrapper.eq("is_deleted", "0");
         return userMapper.selectList(queryWrapper);
     }
 
     @Override
     public User updateUser(User user) {
         userMapper.updateById(user);
-        return getUserById(user.getId());
+        return getUserById(user.getUserId());
     }
 
     @Override
     public void deleteUser(String id) {
         User user = new User();
-        user.setId(id);
-        user.setDeleted("1");
+        user.setUserId(id);
+        user.setIsDeleted("1");
         userMapper.updateById(user);
     }
 
     @Override
-    public User login(String name, String password) {
+    public User login(String phoneNo) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name", name)
-                    .eq("password", password)
-                    .eq("deleted", "0");
-        User user = userMapper.selectOne(queryWrapper);
+        queryWrapper.eq("phone_no", phoneNo)
+                    .eq("is_deleted", "0");
+        User user = this.baseMapper.selectOne(queryWrapper);
         if (user != null) {
             // 使用新的token生成方法
-            String newToken = TokenUtil.generateToken(user.getId());
+            String newToken = TokenUtil.generateToken(user.getUserId());
             user.setToken(newToken);
-            userMapper.updateById(user);
+            this.baseMapper.updateById(user);
             return user;
         }
         return null;
