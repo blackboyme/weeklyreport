@@ -64,7 +64,7 @@ public class UserController {
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("登录失败：用户名或密码错误");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("登录失败：用户不存在");
         }
     }
 
