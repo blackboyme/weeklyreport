@@ -6,6 +6,7 @@ import com.caac.weeklyreport.entity.User;
 import com.caac.weeklyreport.mapper.UserMapper;
 import com.caac.weeklyreport.service.UserService;
 import com.caac.weeklyreport.util.TokenUtil;
+import com.caac.weeklyreport.entity.UserInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,47 +56,62 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public User login(String phoneNo) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("phone_no", phoneNo)
-                    .eq("is_deleted", "0");
-        User user = this.baseMapper.selectOne(queryWrapper);
-        if (user != null) {
-            // 使用新的token生成方法
-            String newToken = TokenUtil.generateToken(user.getUserId());
+    public UserInfo login(String phoneNo) {
+        // 使用新的查询方法获取完整的用户信息
+        UserInfo userInfo = userMapper.getUserInfoByPhoneNo(phoneNo);
+        if (userInfo != null) {
+            // 生成新的token
+            String newToken = TokenUtil.generateToken(userInfo);
+            // 更新用户token
+            User user = new User();
+            user.setUserId(userInfo.getUserId());
             user.setToken(newToken);
-            this.baseMapper.updateById(user);
-            return user;
+            userMapper.updateById(user);
+            // 设置token到userInfo
+            userInfo.setToken(newToken);
+            return userInfo;
         }
         return null;
     }
 
     // 添加一个新方法来验证token
     @Override
-    public User validateUserByToken(String token) {
-        String userId = TokenUtil.validateToken(token);
-        if (userId != null) {
-            User user = getUserById(userId);
-            if (user != null && TokenUtil.isTokenExpiringSoon(token)) {
-                // 如果token即将过期，生成新的token
-                String newToken = TokenUtil.generateToken(userId);
-                user.setToken(newToken);
-                userMapper.updateById(user);
+    public UserInfo validateUserByToken(String token) {
+        UserInfo userInfo = TokenUtil.validateToken(token);
+        if (userInfo != null) {
+            // 重新从数据库获取最新的用户信息
+            UserInfo latestUserInfo = userMapper.getUserInfoByPhoneNo(userInfo.getPhoneNo());
+            if (latestUserInfo != null) {
+                if (TokenUtil.isTokenExpiringSoon(token)) {
+                    // 如果token即将过期，生成新的token
+                    String newToken = TokenUtil.generateToken(latestUserInfo);
+                    User user = new User();
+                    user.setUserId(latestUserInfo.getUserId());
+                    user.setToken(newToken);
+                    userMapper.updateById(user);
+                    latestUserInfo.setToken(newToken);
+                } else {
+                    latestUserInfo.setToken(token);
+                }
+                return latestUserInfo;
             }
-            return user;
         }
         return null;
     }
 
     @Override
     public String refreshToken(String oldToken) {
-        String userId = TokenUtil.validateToken(oldToken);
-        if (userId != null) {
-            String newToken = TokenUtil.generateToken(userId);
-            User user = getUserById(userId);
-            user.setToken(newToken);
-            userMapper.updateById(user);
-            return newToken;
+        UserInfo userInfo = TokenUtil.validateToken(oldToken);
+        if (userInfo != null) {
+            UserInfo latestUserInfo = userMapper.getUserInfoByPhoneNo(userInfo.getPhoneNo());
+            if (latestUserInfo != null) {
+                String newToken = TokenUtil.generateToken(latestUserInfo);
+                User user = new User();
+                user.setUserId(latestUserInfo.getUserId());
+                user.setToken(newToken);
+                userMapper.updateById(user);
+                return newToken;
+            }
         }
         return null;
     }

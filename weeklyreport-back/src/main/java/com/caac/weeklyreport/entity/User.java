@@ -1,11 +1,18 @@
 package com.caac.weeklyreport.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
-
 @Data
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
+@TableName("user")
+@ApiModel(value="User对象", description="用户表")
 public class User {
     @TableId
     private String userId;          // 用户ID

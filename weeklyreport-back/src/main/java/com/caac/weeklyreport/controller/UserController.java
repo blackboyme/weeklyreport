@@ -1,6 +1,7 @@
 package com.caac.weeklyreport.controller;
 
 import com.caac.weeklyreport.entity.User;
+import com.caac.weeklyreport.entity.UserInfo;
 import com.caac.weeklyreport.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService userService;
@@ -60,9 +61,9 @@ public class UserController {
             return ResponseEntity.badRequest().body("手机号不能为空");
         }
 
-        User user = userService.login(phoneNo);
-        if (user != null) {
-            return ResponseEntity.ok(user);
+        UserInfo userInfo = userService.login(phoneNo);
+        if (userInfo != null) {
+            return ResponseEntity.ok(userInfo);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("登录失败：用户不存在");
         }
@@ -75,9 +76,9 @@ public class UserController {
         }
         String token = authHeader.substring(7); // Remove "Bearer " prefix
 
-        User user = userService.validateUserByToken(token);
-        if (user != null) {
-            return ResponseEntity.ok(user);
+        UserInfo userInfo = userService.validateUserByToken(token);
+        if (userInfo != null) {
+            return ResponseEntity.ok(userInfo);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("无效的token");
         }

@@ -1,6 +1,8 @@
 package com.caac.weeklyreport.interceptor;
 
+import com.caac.weeklyreport.entity.UserInfo;
 import com.caac.weeklyreport.service.UserService;
+import com.caac.weeklyreport.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -24,12 +26,13 @@ public class TokenInterceptor implements HandlerInterceptor {
         }
 
         String token = authHeader.substring(7); // Remove "Bearer " prefix
-        if (userService.validateUserByToken(token) == null) {
+        UserInfo userInfo = userService.validateUserByToken(token);
+        if (null == userInfo) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Invalid token");
             return false;
         }
-
+        UserContext.setCurrentUser(userInfo);
         return true;
     }
 }
