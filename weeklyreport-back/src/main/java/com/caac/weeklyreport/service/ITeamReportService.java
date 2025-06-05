@@ -1,7 +1,9 @@
 package com.caac.weeklyreport.service;
 
-import com.caac.weeklyreport.entity.TeamReport;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.caac.weeklyreport.entity.TeamReport;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,5 +14,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-06-05
  */
 public interface ITeamReportService extends IService<TeamReport> {
-
+    TeamReport createTeamReport(TeamReport teamReport);
+    TeamReport getTeamReportById(String id);
+    List<TeamReport> getAllTeamReports();
+    TeamReport updateTeamReport(TeamReport teamReport);
+    void deleteTeamReport(String id);
 }

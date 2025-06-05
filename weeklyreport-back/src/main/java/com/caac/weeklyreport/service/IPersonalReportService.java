@@ -1,7 +1,9 @@
 package com.caac.weeklyreport.service;
 
-import com.caac.weeklyreport.entity.PersonalReport;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.caac.weeklyreport.entity.PersonalReport;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,5 +14,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-06-05
  */
 public interface IPersonalReportService extends IService<PersonalReport> {
-
+    PersonalReport createPersonalReport(PersonalReport personalReport);
+    PersonalReport getPersonalReportById(String id);
+    List<PersonalReport> getAllPersonalReports();
+    PersonalReport updatePersonalReport(PersonalReport personalReport);
+    void deletePersonalReport(String id);
 }

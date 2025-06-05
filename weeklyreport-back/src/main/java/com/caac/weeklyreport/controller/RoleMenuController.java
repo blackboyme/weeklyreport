@@ -1,9 +1,11 @@
 package com.caac.weeklyreport.controller;
 
+import com.caac.weeklyreport.entity.RoleMenu;
+import com.caac.weeklyreport.service.IRoleMenuService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 /**
  * <p>
@@ -14,7 +16,56 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2025-06-05
  */
 @RestController
-@RequestMapping("/role-menu")
+@RequestMapping("/api/v1/role-menu")
 public class RoleMenuController {
+    
+    private final IRoleMenuService roleMenuService;
 
+    public RoleMenuController(IRoleMenuService roleMenuService) {
+        this.roleMenuService = roleMenuService;
+    }
+
+    @PostMapping
+    public ResponseEntity<RoleMenu> createRoleMenu(@RequestBody RoleMenu roleMenu) {
+        return ResponseEntity.ok(roleMenuService.createRoleMenu(roleMenu));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RoleMenu> getRoleMenu(@PathVariable String id) {
+        RoleMenu roleMenu = roleMenuService.getRoleMenuById(id);
+        return roleMenu != null ? ResponseEntity.ok(roleMenu) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<RoleMenu>> getAllRoleMenus() {
+        return ResponseEntity.ok(roleMenuService.getAllRoleMenus());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RoleMenu> updateRoleMenu(@PathVariable String id, @RequestBody RoleMenu roleMenu) {
+        roleMenu.setRoleMenuId(id);
+        return ResponseEntity.ok(roleMenuService.updateRoleMenu(roleMenu));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRoleMenu(@PathVariable String id) {
+        roleMenuService.deleteRoleMenu(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/role/{roleId}")
+    public ResponseEntity<List<RoleMenu>> getRoleMenusByRoleId(@PathVariable String roleId) {
+        return ResponseEntity.ok(roleMenuService.getRoleMenusByRoleId(roleId));
+    }
+
+    @GetMapping("/menu/{menuId}")
+    public ResponseEntity<List<RoleMenu>> getRoleMenusByMenuId(@PathVariable String menuId) {
+        return ResponseEntity.ok(roleMenuService.getRoleMenusByMenuId(menuId));
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<Void> batchAssignMenusToRole(@RequestParam String roleId, @RequestBody List<String> menuIds) {
+        roleMenuService.batchAssignMenusToRole(roleId, menuIds);
+        return ResponseEntity.ok().build();
+    }
 }

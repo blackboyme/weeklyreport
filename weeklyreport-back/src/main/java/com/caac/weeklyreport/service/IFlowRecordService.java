@@ -1,7 +1,9 @@
 package com.caac.weeklyreport.service;
 
-import com.caac.weeklyreport.entity.FlowRecord;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.caac.weeklyreport.entity.FlowRecord;
+
+import java.util.List;
 
 /**
  * <p>
@@ -12,5 +14,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2025-06-05
  */
 public interface IFlowRecordService extends IService<FlowRecord> {
-
+    FlowRecord createFlowRecord(FlowRecord flowRecord);
+    FlowRecord getFlowRecordById(String id);
+    List<FlowRecord> getAllFlowRecords();
+    FlowRecord updateFlowRecord(FlowRecord flowRecord);
+    void deleteFlowRecord(String id);
 }

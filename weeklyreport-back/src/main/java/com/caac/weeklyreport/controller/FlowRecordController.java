@@ -1,9 +1,11 @@
 package com.caac.weeklyreport.controller;
 
+import com.caac.weeklyreport.entity.FlowRecord;
+import com.caac.weeklyreport.service.IFlowRecordService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 /**
  * <p>
@@ -14,7 +16,40 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2025-06-05
  */
 @RestController
-@RequestMapping("/flow-record")
+@RequestMapping("/api/v1/flow-record")
 public class FlowRecordController {
+    
+    private final IFlowRecordService flowRecordService;
 
+    public FlowRecordController(IFlowRecordService flowRecordService) {
+        this.flowRecordService = flowRecordService;
+    }
+
+    @PostMapping
+    public ResponseEntity<FlowRecord> createFlowRecord(@RequestBody FlowRecord flowRecord) {
+        return ResponseEntity.ok(flowRecordService.createFlowRecord(flowRecord));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FlowRecord> getFlowRecord(@PathVariable String id) {
+        FlowRecord flowRecord = flowRecordService.getFlowRecordById(id);
+        return flowRecord != null ? ResponseEntity.ok(flowRecord) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<FlowRecord>> getAllFlowRecords() {
+        return ResponseEntity.ok(flowRecordService.getAllFlowRecords());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<FlowRecord> updateFlowRecord(@PathVariable String id, @RequestBody FlowRecord flowRecord) {
+        flowRecord.setFlowId(id);
+        return ResponseEntity.ok(flowRecordService.updateFlowRecord(flowRecord));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFlowRecord(@PathVariable String id) {
+        flowRecordService.deleteFlowRecord(id);
+        return ResponseEntity.ok().build();
+    }
 }

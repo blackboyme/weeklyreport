@@ -1,7 +1,8 @@
 package com.caac.weeklyreport.mapper;
 
-import com.caac.weeklyreport.entity.TeamReport;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.caac.weeklyreport.entity.TeamReport;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author hanrenjie
  * @since 2025-06-05
  */
+@Mapper
 public interface TeamReportMapper extends BaseMapper<TeamReport> {
 
 }
