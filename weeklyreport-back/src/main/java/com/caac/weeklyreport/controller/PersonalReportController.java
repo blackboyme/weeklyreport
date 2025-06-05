@@ -30,6 +30,14 @@ public class PersonalReportController {
         return ResponseEntity.ok(personalReportService.createPersonalReport(personalReport));
     }
 
+    @PostMapping("/draft")
+    public ResponseEntity<PersonalReport> createPersonalReportDraft(@RequestBody PersonalReport personalReport) {
+        if (personalReport.getUserId() == null || personalReport.getWeek() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(personalReportService.createOrUpdateDraft(personalReport));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PersonalReport> getPersonalReport(@PathVariable String id) {
         PersonalReport personalReport = personalReportService.getPersonalReportById(id);

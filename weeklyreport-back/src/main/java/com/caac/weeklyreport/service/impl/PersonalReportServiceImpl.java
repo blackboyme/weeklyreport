@@ -63,5 +63,38 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
         personalReport.setPrId(id);
         personalReport.setIsDeleted("1");
         personalReport.setUpdatedAt(LocalDateTime.now());
+        personalReportMapper.updateById(personalReport);
+    }
+
+    @Override
+    public PersonalReport createOrUpdateDraft(PersonalReport personalReport) {
+        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReport.getUserId(), personalReport.getWeek());
+        
+        if (existingDraft != null) {
+            // 更新草稿
+            personalReport.setPrId(existingDraft.getPrId());
+            personalReport.setUpdatedAt(LocalDateTime.now());
+            personalReport.setIsDeleted("0");
+            personalReportMapper.updateById(personalReport);
+            return getPersonalReportById(existingDraft.getPrId());
+        } else {
+            // 创建新草稿
+            personalReport.setPrId(UUID.randomUUID().toString());
+            personalReport.setCreatedAt(LocalDateTime.now());
+            personalReport.setUpdatedAt(LocalDateTime.now());
+            personalReport.setIsDeleted("0");
+            personalReportMapper.insert(personalReport);
+            return getPersonalReportById(personalReport.getPrId());
+        }
+    }
+
+    @Override
+    public PersonalReport getDraftByUserIdAndWeek(String userId, int week) {
+        QueryWrapper<PersonalReport> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId)
+                   .eq("week", week)
+                   .eq("status", "draft")
+                   .eq("is_deleted", "0");
+        return personalReportMapper.selectOne(queryWrapper);
     }
 }

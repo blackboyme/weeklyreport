@@ -19,4 +19,6 @@ public interface IPersonalReportService extends IService<PersonalReport> {
     List<PersonalReport> getAllPersonalReports();
     PersonalReport updatePersonalReport(PersonalReport personalReport);
     void deletePersonalReport(String id);
+    PersonalReport createOrUpdateDraft(PersonalReport personalReport);
+    PersonalReport getDraftByUserIdAndWeek(String userId, int week);
 }
