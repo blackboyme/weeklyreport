@@ -33,6 +33,10 @@ public class DeptReport implements Serializable {
     @TableId(value = "dr_id", type = IdType.NONE)
     private String drId;
 
+    @ApiModelProperty(value = "流程ID")
+    @TableId(value = "flow_id")
+    private String flowId;
+
     @ApiModelProperty(value = "员工ID")
     @TableField("user_id")
     private String userId;

@@ -1,5 +1,7 @@
 package com.caac.weeklyreport.controller;
 
+import com.caac.weeklyreport.ResultBean;
+import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.Menu;
 import com.caac.weeklyreport.entity.UserInfo;
 import com.caac.weeklyreport.service.MenuService;
@@ -28,13 +30,13 @@ public class MenuController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Menu>> getMenu() {
+    public ResultBean<?> getMenu() {
         UserInfo currentUser = UserContext.getCurrentUser();
         if (currentUser == null) {
-            return ResponseEntity.badRequest().build();
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
         }
         
         List<Menu> menus = menuService.getMenusByRoleId(currentUser.getRoleId());
-        return ResponseEntity.ok(menus);
+        return ResultBean.success(menus);
     }
 }

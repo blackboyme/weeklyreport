@@ -33,6 +33,10 @@ public class PersonalReport implements Serializable {
     @TableId(value = "pr_id", type = IdType.NONE)
     private String prId;
 
+    @ApiModelProperty(value = "流程ID")
+    @TableId(value = "flow_id")
+    private String flowId;
+
     @ApiModelProperty(value = "员工ID")
     @TableField("user_id")
     private String userId;

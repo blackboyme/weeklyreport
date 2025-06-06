@@ -1,7 +1,12 @@
 package com.caac.weeklyreport.controller;
 
+import com.caac.weeklyreport.ResultBean;
+import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.PersonalReport;
+import com.caac.weeklyreport.entity.UserInfo;
 import com.caac.weeklyreport.service.IPersonalReportService;
+import com.caac.weeklyreport.util.UserContext;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,12 +35,12 @@ public class PersonalReportController {
         return ResponseEntity.ok(personalReportService.createPersonalReport(personalReport));
     }
 
-    @PostMapping("/draft")
-    public ResponseEntity<PersonalReport> createPersonalReportDraft(@RequestBody PersonalReport personalReport) {
-        if (personalReport.getUserId() == null || personalReport.getWeek() == null) {
-            return ResponseEntity.badRequest().build();
+    @PostMapping("/saveDraft")
+    public ResultBean<?> savePersonalReportDraft(@RequestBody PersonalReport personalReport) {
+        if (StringUtils.isEmpty(personalReport.getUserId()) || personalReport.getWeek() == null) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
         }
-        return ResponseEntity.ok(personalReportService.createOrUpdateDraft(personalReport));
+        return ResultBean.success(personalReportService.savePersonalReportDraft(personalReport));
     }
 
     @GetMapping("/{id}")

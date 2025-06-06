@@ -33,6 +33,10 @@ public class TeamReport implements Serializable {
     @TableId(value = "tr_id", type = IdType.NONE)
     private String trId;
 
+    @ApiModelProperty(value = "流程ID")
+    @TableId(value = "flow_id")
+    private String flowId;
+
     @ApiModelProperty(value = "员工ID")
     @TableField("user_id")
     private String userId;
