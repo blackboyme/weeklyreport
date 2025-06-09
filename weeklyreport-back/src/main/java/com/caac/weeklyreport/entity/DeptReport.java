@@ -30,11 +30,10 @@ public class DeptReport implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "周报ID")
-    @TableId(value = "dr_id", type = IdType.NONE)
+    @TableId
     private String drId;
 
     @ApiModelProperty(value = "流程ID")
-    @TableId(value = "flow_id")
     private String flowId;
 
     @ApiModelProperty(value = "员工ID")
@@ -116,6 +115,5 @@ public class DeptReport implements Serializable {
     @ApiModelProperty(value = "是否删除(0-正常,1-删除)")
     @TableField("is_deleted")
     private String isDeleted;
-
 
 }

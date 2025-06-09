@@ -3,9 +3,9 @@ package com.caac.weeklyreport.controller;
 import com.caac.weeklyreport.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.PersonalReport;
-import com.caac.weeklyreport.entity.UserInfo;
 import com.caac.weeklyreport.service.IPersonalReportService;
-import com.caac.weeklyreport.util.UserContext;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v1/personal-report")
+@Api(value = "个人周报管理", tags = "个人周报管理")
 public class PersonalReportController {
     
     private final IPersonalReportService personalReportService;
@@ -35,12 +36,22 @@ public class PersonalReportController {
         return ResponseEntity.ok(personalReportService.createPersonalReport(personalReport));
     }
 
+    @ApiOperation(value = "保存为草稿", notes = "保存为草稿")
     @PostMapping("/saveDraft")
     public ResultBean<?> savePersonalReportDraft(@RequestBody PersonalReport personalReport) {
         if (StringUtils.isEmpty(personalReport.getUserId()) || personalReport.getWeek() == null) {
             return ResultBean.fail(ResultCode.PARAM_IS_NULL);
         }
         return ResultBean.success(personalReportService.savePersonalReportDraft(personalReport));
+    }
+
+    @ApiOperation(value = "提交", notes = "提交")
+    @PostMapping("/submit")
+    public ResultBean<?> submitPersonalReport(@RequestBody PersonalReport personalReport) {
+        if (StringUtils.isEmpty(personalReport.getUserId()) || personalReport.getWeek() == null) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(personalReportService.submitPersonalReport(personalReport));
     }
 
     @GetMapping("/{id}")

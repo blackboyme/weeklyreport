@@ -3,15 +3,18 @@ package com.caac.weeklyreport.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.common.ResultCode;
-import com.caac.weeklyreport.entity.FlowHistory;
-import com.caac.weeklyreport.entity.FlowRecord;
-import com.caac.weeklyreport.entity.PersonalReport;
-import com.caac.weeklyreport.entity.UserInfo;
+import com.caac.weeklyreport.common.enums.CommonConstants;
+import com.caac.weeklyreport.entity.*;
 import com.caac.weeklyreport.exception.BusinessException;
+import com.caac.weeklyreport.mapper.FlowHistoryMapper;
+import com.caac.weeklyreport.mapper.FlowRecordMapper;
 import com.caac.weeklyreport.mapper.PersonalReportMapper;
+import com.caac.weeklyreport.mapper.UserMapper;
 import com.caac.weeklyreport.service.IPersonalReportService;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
 import com.caac.weeklyreport.util.UserContext;
+import com.caac.weeklyreport.util.WeekDateUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +33,17 @@ import java.util.UUID;
 @Service
 public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper, PersonalReport> implements IPersonalReportService {
 
-    private final PersonalReportMapper personalReportMapper;
+    @Autowired
+    private PersonalReportMapper personalReportMapper;
 
-    public PersonalReportServiceImpl(PersonalReportMapper personalReportMapper) {
-        this.personalReportMapper = personalReportMapper;
-    }
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private FlowHistoryMapper flowHistoryMapper;
+
+    @Autowired
+    private FlowRecordMapper flowRecordMapper;
 
     @Override
     public PersonalReport createPersonalReport(PersonalReport personalReport) {
@@ -86,11 +95,29 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
         PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReport.getUserId(), personalReport.getWeek());
 
         if (existingDraft != null) {
-            // 更新草稿
+            // 更新
             personalReport.setPrId(existingDraft.getPrId());
+            personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
+            personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
             personalReport.setUpdatedAt(LocalDateTime.now());
             personalReport.setIsDeleted("0");
             personalReportMapper.updateById(personalReport);
+
+            //创建新历史记录
+            FlowHistory flowHistory = new FlowHistory();
+            flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setFlowId(existingDraft.getFlowId());
+            flowHistory.setReportId(existingDraft.getPrId());
+            flowHistory.setReportType(CommonConstants.REPORT_TYPE_PERSONAL);//1-个人周报,2-团队周报,3-部门周报
+            flowHistory.setOperation(CommonConstants.OPERATION_DRAFT);//1-保存为草稿,2-提交,3-通过,4-退回
+            flowHistory.setOperatorId(userInfo.getUserId());
+            flowHistory.setOperatorName(userInfo.getUserName());
+            flowHistory.setOperatorRole(userInfo.getRoleId());
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL);
+            flowHistory.setIsDeleted("0");
+
+            flowHistoryMapper.insert(flowHistory);
+
             return getPersonalReportById(existingDraft.getPrId());
         } else {
             String flowId = KeyGeneratorUtil.generateUUID();
@@ -99,6 +126,8 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             // 创建新草稿
             personalReport.setPrId(prId);
             personalReport.setFlowId(flowId);
+            personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
+            personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
             personalReport.setCreatedAt(LocalDateTime.now());
             personalReport.setUpdatedAt(LocalDateTime.now());
             personalReport.setIsDeleted("0");
@@ -108,24 +137,109 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             FlowRecord flowRecord = new FlowRecord();
             flowRecord.setFlowId(flowId);
             flowRecord.setReportId(prId);
-            flowRecord.setReportType("1"); //1-个人周报,2-团队周报,3-部门周报
-            flowRecord.setCurrentStatus("0"); //0-草稿,1-待审核,2-已审核,3-已退回
-            flowRecord.setCurrentStage("1"); //1-员工提交,2-团队审核,3-部门审核
+            flowRecord.setReportType(CommonConstants.REPORT_TYPE_PERSONAL); //1-个人周报,2-团队周报,3-部门周报
+            flowRecord.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT); //1-草稿，2-待审核，3.-已审核，4-已退回
+            flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL); //1-员工提交,2-团队审核,3-部门审核
             flowRecord.setSubmitterId(userInfo.getUserId());
             flowRecord.setSubmitterName(userInfo.getUserName());
-            flowRecord.setCreatedAt(LocalDateTime.now());
-            flowRecord.setUpdatedAt(LocalDateTime.now());
             flowRecord.setIsDeleted("0");
+            flowRecordMapper.insert(flowRecord);
+
+            //创建新历史记录
+            FlowHistory flowHistory = new FlowHistory();
+            flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setFlowId(flowId);
+            flowHistory.setReportId(prId);
+            flowHistory.setReportType(CommonConstants.REPORT_TYPE_PERSONAL);//1-个人周报,2-团队周报,3-部门周报
+            flowHistory.setOperation(CommonConstants.OPERATION_DRAFT);//1-保存为草稿,2-提交,3-通过,4-退回
+            flowHistory.setOperatorId(userInfo.getUserId());
+            flowHistory.setOperatorName(userInfo.getUserName());
+            flowHistory.setOperatorRole(userInfo.getRoleId());
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL);
+            flowHistory.setIsDeleted("0");
+            flowHistoryMapper.insert(flowHistory);
+
+            return personalReport;
+        }
+    }
+
+    @Override
+    @Transactional
+    public PersonalReport submitPersonalReport(PersonalReport personalReport) {
+        // 不能修改其他人的周报
+        UserInfo userInfo = UserContext.getCurrentUser();
+        if(!userInfo.getUserId().equals(personalReport.getUserId())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+
+        User approver = getApprover(userInfo);
+
+        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReport.getUserId(), personalReport.getWeek());
+
+        if (existingDraft != null) {
+            // 更新草稿
+            personalReport.setPrId(existingDraft.getPrId());
+            personalReport.setUpdatedAt(LocalDateTime.now());
+            personalReport.setIsDeleted("0");
+            personalReportMapper.updateById(personalReport);
 
             //创建新历史记录
             FlowHistory flowHistory = new FlowHistory();
             flowHistory.setFlowId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setReportId(existingDraft.getPrId());
+            flowHistory.setReportType(CommonConstants.REPORT_TYPE_PERSONAL);//1-个人周报,2-团队周报,3-部门周报
+            flowHistory.setOperation(CommonConstants.OPERATION_SUBMIT);//1-保存为草稿,2-提交,3-通过,4-退回
+            flowHistory.setOperatorId(userInfo.getUserId());
+            flowHistory.setOperatorName(userInfo.getUserName());
+            flowHistory.setOperatorRole(userInfo.getRoleId());
+            flowHistory.setIsDeleted("0");
+            flowHistoryMapper.insert(flowHistory);
+
+            flowRecordMapper.updateStatus(existingDraft.getFlowId(),CommonConstants.CURRENT_STATUS_SUBMIT,
+                    approver.getUserId(),approver.getUserName());
+
+            return getPersonalReportById(existingDraft.getPrId());
+        } else {
+            String flowId = KeyGeneratorUtil.generateUUID();
+            String prId = KeyGeneratorUtil.generateUUID();
+
+            // 创建新草稿
+            personalReport.setPrId(prId);
+            personalReport.setFlowId(flowId);
+            personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
+            personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
+            personalReport.setIsDeleted("0");
+            personalReportMapper.insert(personalReport);
+
+            //创建新流程
+            FlowRecord flowRecord = new FlowRecord();
+            flowRecord.setFlowId(flowId);
+            flowRecord.setReportId(prId);
+            flowRecord.setReportType(CommonConstants.REPORT_TYPE_PERSONAL); //1-个人周报,2-团队周报,3-部门周报
+            flowRecord.setCurrentStatus(CommonConstants.CURRENT_STATUS_SUBMIT); //1-草稿，2-待审核，3.-已审核，4-已退回
+            flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL); //1-员工提交,2-团队审核,3-部门审核
+            flowRecord.setSubmitterId(userInfo.getUserId());
+            flowRecord.setSubmitterName(userInfo.getUserName());
+            flowRecord.setApproverId(approver.getUserId());
+            flowRecord.setApproverName(approver.getUserName());
+            flowRecord.setIsDeleted("0");
+            flowRecordMapper.insert(flowRecord);
+
+            //创建新历史记录
+            FlowHistory flowHistory = new FlowHistory();
+            flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setFlowId(flowId);
             flowHistory.setReportId(prId);
-            flowHistory.setReportType("1");//1-个人周报,2-团队周报,3-部门周报
-            flowHistory.setOperation("1");//1-保存为草稿,2-提交,3-通过,4-退回
+            flowHistory.setReportType(CommonConstants.REPORT_TYPE_PERSONAL);//1-个人周报,2-团队周报,3-部门周报
+            flowHistory.setOperation(CommonConstants.OPERATION_SUBMIT);//1-保存为草稿,2-提交,3-通过,4-退回
+            flowHistory.setOperatorId(userInfo.getUserId());
+            flowHistory.setOperatorName(userInfo.getUserName());
+            flowHistory.setOperatorRole(userInfo.getRoleId());
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL);
+            flowHistory.setIsDeleted("0");
+            flowHistoryMapper.insert(flowHistory);
 
-
-            return getPersonalReportById(personalReport.getPrId());
+            return personalReport;
         }
     }
 
@@ -134,8 +248,20 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
         QueryWrapper<PersonalReport> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId)
                    .eq("week", week)
-                   .eq("status", "draft")
                    .eq("is_deleted", "0");
         return personalReportMapper.selectOne(queryWrapper);
+    }
+
+
+    public User getApprover(UserInfo userInfo) {
+        User submitter = null;
+        if("1".equals(userInfo.getRoleType())){
+            submitter = userMapper.getTeamApprover(userInfo.getTeamId(),"2");
+        } else if("2".equals(userInfo.getRoleType())){
+            submitter = userMapper.getDeptApprover("3");
+        } else {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        return submitter;
     }
 }

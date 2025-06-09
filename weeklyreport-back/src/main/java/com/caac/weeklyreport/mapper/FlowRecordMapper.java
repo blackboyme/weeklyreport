@@ -3,6 +3,7 @@ package com.caac.weeklyreport.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.caac.weeklyreport.entity.FlowRecord;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -14,5 +15,8 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface FlowRecordMapper extends BaseMapper<FlowRecord> {
+
+    int updateStatus(@Param("flowId") String flowId, @Param("status") String status,
+                     @Param("approverId") String approverId,@Param("approverName")String approverName);
 
 }

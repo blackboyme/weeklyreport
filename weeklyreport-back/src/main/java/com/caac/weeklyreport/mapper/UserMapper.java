@@ -20,4 +20,24 @@ public interface UserMapper extends BaseMapper<User> {
             "LEFT JOIN team t ON u.team_id = t.team_id " +
             "WHERE u.phone_no = #{phoneNo} AND u.is_deleted = '0'")
     UserInfo getUserInfoByPhoneNo(String phoneNo);
+
+    @Select("SELECT u.* " +
+            "FROM user u " +
+            "WHERE u.team_id =  #{teamId} " +
+            "AND u.is_deleted = '0' " +
+            "AND u.role_id = ( " +
+            "SELECT r.role_id " +
+            "FROM role r " +
+            "WHERE r.role_type = #{roleType} LIMIT 1) ")
+    User getTeamApprover(String teamId,String roleType);
+
+    @Select("SELECT u.* " +
+            "FROM user u " +
+            "WHERE u.is_deleted = '0' " +
+            "AND u.role_id = ( " +
+            "SELECT r.role_id " +
+            "FROM role r " +
+            "WHERE r.role_type = #{roleType} LIMIT 1) ")
+    User getDeptApprover(String roleType);
+
 }
