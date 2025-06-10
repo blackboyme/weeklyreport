@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caac.weeklyreport.mapper.FlowRecordMapper">
+    <update id="updateStatus">
+        UPDATE flow_record 
+        SET current_status = #{status},
+            approver_id = #{approverId},
+            approver_name = #{approverName}
+        WHERE flow_id = #{flowId}
+    </update>
+</mapper>
