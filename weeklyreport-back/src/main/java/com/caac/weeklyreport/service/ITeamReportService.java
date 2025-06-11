@@ -19,4 +19,9 @@ public interface ITeamReportService extends IService<TeamReport> {
     List<TeamReport> getAllTeamReports();
     TeamReport updateTeamReport(TeamReport teamReport);
     void deleteTeamReport(String id);
+    TeamReport saveTeamReportDraft(TeamReport teamReport);
+    TeamReport getTeamDraftByUserIdAndWeek(String userId, int week);
+    TeamReport submitTeamReport(TeamReport teamReport);
+
+
 }

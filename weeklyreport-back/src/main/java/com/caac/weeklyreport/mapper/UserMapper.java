@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.caac.weeklyreport.entity.User;
 import com.caac.weeklyreport.entity.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 @Mapper
@@ -29,7 +30,7 @@ public interface UserMapper extends BaseMapper<User> {
             "SELECT r.role_id " +
             "FROM role r " +
             "WHERE r.role_type = #{roleType} LIMIT 1) ")
-    User getTeamApprover(String teamId,String roleType);
+    User getTeamApprover(@Param("teamId") String teamId, @Param("roleType") String roleType);
 
     @Select("SELECT u.* " +
             "FROM user u " +

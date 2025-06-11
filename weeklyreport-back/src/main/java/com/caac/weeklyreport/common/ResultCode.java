@@ -63,8 +63,17 @@ public enum ResultCode {
     FILE_UPLOAD_FAILED(3002,"文件上传失败"),
     FILE_DOWNLOAD_SUCCESS(3003,"文件下载成功"),
     FILE_DOWNLOAD_FAILED(3004,"文件下载失败"),
-    FILE_EMPTY(3005,"文件名为空");
+    FILE_EMPTY(3005,"文件名为空"),
 
+    //前端使用
+    OPEN_WITHOUT_DATA(4001,"可以打开该功能，无暂存数据"),
+    OPEN_WITH_DATA(4002,"可以打开该功能，有暂存数据"),
+    NO_OPEN(4003,"不可以打开该功能"),
+
+    //流程数据
+    FLOW_IS_NULL(5001,"流程数据为空，请联系管理员！"),
+    FLOW_ACCESS_DENY_PASS(5002,"周报已审核，不可修改！"),
+    FLOW_ACCESS_DENY_SUBMIT(5003,"周报审核中，不可修改！");
 
     private int code;
     private String meassage;

@@ -1,7 +1,11 @@
 package com.caac.weeklyreport.controller;
 
+import com.caac.weeklyreport.ResultBean;
+import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.TeamReport;
 import com.caac.weeklyreport.service.ITeamReportService;
+import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +32,24 @@ public class TeamReportController {
     @PostMapping
     public ResponseEntity<TeamReport> createTeamReport(@RequestBody TeamReport teamReport) {
         return ResponseEntity.ok(teamReportService.createTeamReport(teamReport));
+    }
+
+    @ApiOperation(value = "团队周报保存为草稿", notes = "团队周报保存为草稿")
+    @PostMapping("/saveDraft")
+    public ResultBean<?> saveTeamReportDraft(@RequestBody TeamReport teamReport) {
+        if (StringUtils.isEmpty(teamReport.getUserId()) || teamReport.getWeek() == null) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(teamReportService.saveTeamReportDraft(teamReport));
+    }
+
+    @ApiOperation(value = "团队周报提交", notes = "团队周报提交")
+    @PostMapping("/submit")
+    public ResultBean<?> submitPersonalReport(@RequestBody TeamReport teamReport) {
+        if (StringUtils.isEmpty(teamReport.getUserId()) || teamReport.getWeek() == null) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(teamReportService.submitTeamReport(teamReport));
     }
 
     @GetMapping("/{id}")

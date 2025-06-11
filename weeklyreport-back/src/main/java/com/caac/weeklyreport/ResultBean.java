@@ -139,6 +139,15 @@ public class ResultBean<T> {
 	}
 
 	/**
+	 * 成功，带返回码
+	 * @param
+	 * @author liaopeng
+	 */
+	public static <T> ResultBean success(ResultCode resultCode,T data){
+		return new ResultBean(resultCode,data);
+	}
+
+	/**
 	 * 默认失败方法
 	 * @param
 	 * @author liaopeng

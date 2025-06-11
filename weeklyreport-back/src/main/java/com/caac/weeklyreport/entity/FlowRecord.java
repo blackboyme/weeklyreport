@@ -25,7 +25,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @TableName("flow_record")
 @ApiModel(value="FlowRecord对象", description="流程记录表")
-public class FlowRecord implements Serializable {
+public class    FlowRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -41,7 +41,7 @@ public class FlowRecord implements Serializable {
     @TableField("report_type")
     private String reportType;
 
-    @ApiModelProperty(value = "当前状态：0-草稿,1-待审核,2-已审核,3-已退回")
+    @ApiModelProperty(value = "当前状态：1-草稿,2-待审核,3-已审核,4-已退回")
     @TableField("current_status")
     private String currentStatus;
 

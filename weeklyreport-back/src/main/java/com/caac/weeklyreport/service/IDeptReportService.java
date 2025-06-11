@@ -19,4 +19,7 @@ public interface IDeptReportService extends IService<DeptReport> {
     List<DeptReport> getAllDeptReports();
     DeptReport updateDeptReport(DeptReport deptReport);
     void deleteDeptReport(String id);
+    DeptReport saveDeptReportDraft(DeptReport deptReport);
+    DeptReport getDeptDraftByUserIdAndWeek(String userId, int week);
+
 }

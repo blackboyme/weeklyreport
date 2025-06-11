@@ -1,7 +1,11 @@
 package com.caac.weeklyreport.controller;
 
+import com.caac.weeklyreport.ResultBean;
+import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.DeptReport;
 import com.caac.weeklyreport.service.IDeptReportService;
+import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +32,15 @@ public class DeptReportController {
     @PostMapping
     public ResponseEntity<DeptReport> createDeptReport(@RequestBody DeptReport deptReport) {
         return ResponseEntity.ok(deptReportService.createDeptReport(deptReport));
+    }
+
+    @ApiOperation(value = "部门周报保存为草稿", notes = "部门周报保存为草稿")
+    @PostMapping("/saveDraft")
+    public ResultBean<?> saveDeptReportDraft(@RequestBody DeptReport deptReport) {
+        if (StringUtils.isEmpty(deptReport.getUserId()) || deptReport.getWeek() == null) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(deptReportService.saveDeptReportDraft(deptReport));
     }
 
     @GetMapping("/{id}")
