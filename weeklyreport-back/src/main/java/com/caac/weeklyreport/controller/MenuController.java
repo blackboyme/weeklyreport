@@ -1,12 +1,11 @@
 package com.caac.weeklyreport.controller;
 
-import com.caac.weeklyreport.ResultBean;
+import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.Menu;
 import com.caac.weeklyreport.entity.UserInfo;
 import com.caac.weeklyreport.service.MenuService;
 import com.caac.weeklyreport.util.UserContext;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

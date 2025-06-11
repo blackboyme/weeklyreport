@@ -1,6 +1,6 @@
 package com.caac.weeklyreport.controller;
 
-import com.caac.weeklyreport.ResultBean;
+import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.PersonalReport;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;

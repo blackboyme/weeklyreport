@@ -1,6 +1,5 @@
-package com.caac.weeklyreport;
+package com.caac.weeklyreport.common;
 
-import com.caac.weeklyreport.common.ResultCode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package com.caac.weeklyreport.exception;
 
 
-import com.caac.weeklyreport.ResultBean;
+import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.util.LogBacks;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;

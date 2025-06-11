@@ -1,7 +1,7 @@
 package com.caac.weeklyreport.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.caac.weeklyreport.ResultBean;
+import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.entity.PersonalReport;
 import com.caac.weeklyreport.entity.dto.StatusPersonalReportDTO;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;
