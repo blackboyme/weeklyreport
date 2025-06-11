@@ -52,14 +52,44 @@ public class WeekDateUtils {
         return date.atStartOfDay();
     }
 
-//    public static void main(String[] args) {
-//        // 测试示例
-//        int testWeek = 12;
-//
-//        LocalDateTime startDate = getStartDateOfWeek(testWeek);
-//        System.out.println("第" + testWeek + "周的开始日期是: " + startDate);
-//
-//        LocalDateTime endDate = getEndDateOfWeek(testWeek);
-//        System.out.println("第" + testWeek + "周的结束日期是: " + endDate);
-//    }
+
+    /**
+     * 获取当前日期是当年的第几周（周一作为一周的第一天）
+     * @return 当前周数
+     */
+    public static int getCurrentWeekNumber() {
+        LocalDate today = LocalDate.now();
+        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        return today.get(weekFields.weekOfYear());
+    }
+
+    /**
+     * 获取指定年份的总周数（基于ISO标准）
+     * @param year 年份
+     * @return 该年份的总周数
+     */
+    public static int getTotalWeeksInYear(int year) {
+        LocalDate date = LocalDate.of(year, 12, 31);
+        WeekFields weekFields = WeekFields.ISO;
+
+        // 处理12月31日可能属于下一年第一周的情况
+        int weekNumber = date.get(weekFields.weekOfWeekBasedYear());
+        if (weekNumber == 1) {
+            date = date.minusWeeks(1);
+            weekNumber = date.get(weekFields.weekOfWeekBasedYear());
+        }
+
+        return weekNumber;
+    }
+
+    public static void main(String[] args) {
+        // 测试示例
+        int testWeek = getCurrentWeekNumber();
+
+        LocalDateTime startDate = getStartDateOfWeek(testWeek);
+        System.out.println("第" + testWeek + "周的开始日期是: " + startDate);
+
+        LocalDateTime endDate = getEndDateOfWeek(testWeek);
+        System.out.println("第" + testWeek + "周的结束日期是: " + endDate);
+    }
 }

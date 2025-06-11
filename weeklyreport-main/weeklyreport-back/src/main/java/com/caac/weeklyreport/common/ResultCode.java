@@ -68,8 +68,12 @@ public enum ResultCode {
     //前端使用
     OPEN_WITHOUT_DATA(4001,"可以打开该功能，无暂存数据"),
     OPEN_WITH_DATA(4002,"可以打开该功能，有暂存数据"),
-    NO_OPEN(4003,"不可以打开该功能");
+    NO_OPEN(4003,"不可以打开该功能"),
 
+    //流程数据
+    FLOW_IS_NULL(5001,"流程数据为空，请联系管理员！"),
+    FLOW_ACCESS_DENY_PASS(5002,"周报已审核，不可修改！"),
+    FLOW_ACCESS_DENY_SUBMIT(5003,"周报审核中，不可修改！");
 
     private int code;
     private String meassage;

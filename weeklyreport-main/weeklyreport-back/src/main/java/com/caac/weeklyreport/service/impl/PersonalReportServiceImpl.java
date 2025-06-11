@@ -6,6 +6,8 @@ import com.caac.weeklyreport.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
+import com.caac.weeklyreport.entity.dto.StatusPersonalReportDTO;
+import com.caac.weeklyreport.entity.vo.PersonalReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.FlowHistoryMapper;
 import com.caac.weeklyreport.mapper.FlowRecordMapper;
@@ -15,10 +17,12 @@ import com.caac.weeklyreport.service.IPersonalReportService;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
 import com.caac.weeklyreport.util.UserContext;
 import com.caac.weeklyreport.util.WeekDateUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -87,6 +91,43 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
     }
 
     @Override
+    public StatusPersonalReportDTO getCurrentStatusAndWeeklyReport() {
+        StatusPersonalReportDTO statusPersonalReportDTO = new StatusPersonalReportDTO();
+        UserInfo userInfo = UserContext.getCurrentUser();
+        int currentWeek =  WeekDateUtils.getCurrentWeekNumber();
+        PersonalReport currentPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek,LocalDate.now().getYear());
+        if(currentPersonalReport == null){
+            statusPersonalReportDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
+        } else {
+            FlowRecord flowRecord = flowRecordMapper.selectById(currentPersonalReport.getFlowId());
+            if(flowRecord == null){
+                throw new BusinessException(ResultCode.FLOW_IS_NULL);
+            }
+            statusPersonalReportDTO.setCurrentStatus(flowRecord.getCurrentStatus());
+            statusPersonalReportDTO.setCurrentWeekPersonalReport(currentPersonalReport);
+        }
+
+        // 当前状态为已通过审批，不能修改
+        if (CommonConstants.CURRENT_STATUS_PASS.equals(statusPersonalReportDTO.getCurrentStatus())
+                || CommonConstants.CURRENT_STATUS_SUBMIT.equals(statusPersonalReportDTO.getCurrentStatus())) {
+            statusPersonalReportDTO.setCanOperate(Boolean.FALSE);
+        } else {
+            statusPersonalReportDTO.setCanOperate(Boolean.TRUE);
+        }
+
+        PersonalReport lastWeekPersonalReport = null;
+        if (currentWeek == 1) {
+            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(LocalDate.now().getYear()-1);
+            lastWeekPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), lastYearTotalWeek, LocalDate.now().getYear()-1);
+        } else {
+            lastWeekPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek-1, LocalDate.now().getYear());
+        }
+        statusPersonalReportDTO.setLastWeekPersonalReport(lastWeekPersonalReport);
+
+        return statusPersonalReportDTO;
+    }
+
+    @Override
     public PersonalReport updatePersonalReport(PersonalReport personalReport) {
         personalReport.setUpdatedAt(LocalDateTime.now());
         personalReportMapper.updateById(personalReport);
@@ -104,23 +145,31 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
 
     @Override
     @Transactional
-    public PersonalReport savePersonalReportDraft(PersonalReport personalReport) {
+    public PersonalReport savePersonalReportDraft(PersonalReportVO personalReportVO) {
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!userInfo.getUserId().equals(personalReport.getUserId())){
+        if(!userInfo.getUserId().equals(personalReportVO.getUserId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReport.getUserId(), personalReport.getWeek());
+        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReportVO.getUserId(), personalReportVO.getWeek(),LocalDate.now().getYear());
 
         if (existingDraft != null) {
-            // 更新
-            personalReport.setPrId(existingDraft.getPrId());
-            personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
-            personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
-            personalReport.setUpdatedAt(LocalDateTime.now());
-            personalReport.setIsDeleted("0");
-            personalReportMapper.updateById(personalReport);
+            FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());
+            if (flowRecord == null) {
+                throw new BusinessException(ResultCode.FLOW_IS_NULL);
+            }
+
+            // 当前状态为已通过审批，不能修改
+            if (CommonConstants.CURRENT_STATUS_PASS.equals(flowRecord.getCurrentStatus())) {
+                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_PASS);
+            } else if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(flowRecord.getCurrentStatus())) {
+                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_SUBMIT);
+            }
+
+            BeanUtils.copyProperties(personalReportVO, existingDraft);
+            existingDraft.setUpdatedAt(LocalDateTime.now());
+            personalReportMapper.updateById(existingDraft);
 
             //创建新历史记录
             FlowHistory flowHistory = new FlowHistory();
@@ -142,9 +191,15 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             String flowId = KeyGeneratorUtil.generateUUID();
             String prId = KeyGeneratorUtil.generateUUID();
 
+            PersonalReport personalReport = new PersonalReport();
+            BeanUtils.copyProperties(personalReportVO, personalReport);
             // 创建新草稿
             personalReport.setPrId(prId);
             personalReport.setFlowId(flowId);
+            personalReport.setUserName(userInfo.getUserName());
+            personalReport.setTeamId(userInfo.getTeamId());
+            personalReport.setTeamName(userInfo.getTeamName());
+            personalReport.setDeptName(userInfo.getDepartName());
             personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
             personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
             personalReport.setCreatedAt(LocalDateTime.now());
@@ -181,52 +236,44 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             return personalReport;
         }
     }
-    /**
-     * zjy
-     */
-    @Override
-    @Transactional
-    public ResultBean<PersonalReport> frontPersonalReportCheck(String userId, int week){
-        UserInfo currentUser = UserContext.getCurrentUser();
-        if(!currentUser.getUserId().equals(userId)){
-            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
-        }
-        PersonalReport existingDraft = getDraftByUserIdAndWeek(userId, week);
-        if(existingDraft == null){
-            return ResultBean.success(ResultCode.OPEN_WITHOUT_DATA);
-        }
-        FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());
-        if("1".equals(flowRecord.getReportType()) && "0".equals(flowRecord.getCurrentStatus())){
-            return ResultBean.success(ResultCode.OPEN_WITH_DATA,existingDraft);
-        }
-        return ResultBean.success(ResultCode.NO_OPEN);
-    }
 
 
     @Override
     @Transactional
-    public PersonalReport submitPersonalReport(PersonalReport personalReport) {
+    public PersonalReport submitPersonalReport(PersonalReportVO personalReportVO) {
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!userInfo.getUserId().equals(personalReport.getUserId())){
+        if(!userInfo.getUserId().equals(personalReportVO.getUserId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
         User approver = getApprover(userInfo);
 
-        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReport.getUserId(), personalReport.getWeek());
+        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReportVO.getUserId(), personalReportVO.getWeek(),LocalDate.now().getYear());
 
         if (existingDraft != null) {
+            FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());
+            if (flowRecord == null) {
+                throw new BusinessException(ResultCode.FLOW_IS_NULL);
+            }
+
+            // 当前状态为已通过审批，不能修改
+            if (CommonConstants.CURRENT_STATUS_PASS.equals(flowRecord.getCurrentStatus())) {
+                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_PASS);
+            } else if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(flowRecord.getCurrentStatus())) {
+                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_SUBMIT);
+            }
+
             // 更新草稿
-            personalReport.setPrId(existingDraft.getPrId());
-            personalReport.setUpdatedAt(LocalDateTime.now());
-            personalReport.setIsDeleted("0");
-            personalReportMapper.updateById(personalReport);
+            BeanUtils.copyProperties(personalReportVO, existingDraft);
+            personalReportMapper.updateById(existingDraft);
 
             //创建新历史记录
             FlowHistory flowHistory = new FlowHistory();
-            flowHistory.setFlowId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setFlowId(existingDraft.getFlowId());
             flowHistory.setReportId(existingDraft.getPrId());
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL); //1-员工提交,2-团队审核,3-部门审核
             flowHistory.setReportType(CommonConstants.REPORT_TYPE_PERSONAL);//1-个人周报,2-团队周报,3-部门周报
             flowHistory.setOperation(CommonConstants.OPERATION_SUBMIT);//1-保存为草稿,2-提交,3-通过,4-退回
             flowHistory.setOperatorId(userInfo.getUserId());
@@ -244,10 +291,19 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             String prId = KeyGeneratorUtil.generateUUID();
 
             // 创建新草稿
+            PersonalReport personalReport = new PersonalReport();
+            BeanUtils.copyProperties(personalReportVO, personalReport);
+            // 创建新草稿
             personalReport.setPrId(prId);
             personalReport.setFlowId(flowId);
+            personalReport.setUserName(userInfo.getUserName());
+            personalReport.setTeamId(userInfo.getTeamId());
+            personalReport.setTeamName(userInfo.getTeamName());
+            personalReport.setDeptName(userInfo.getDepartName());
             personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
             personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
+            personalReport.setCreatedAt(LocalDateTime.now());
+            personalReport.setUpdatedAt(LocalDateTime.now());
             personalReport.setIsDeleted("0");
             personalReportMapper.insert(personalReport);
 
@@ -279,16 +335,17 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             flowHistory.setIsDeleted("0");
             flowHistoryMapper.insert(flowHistory);
 
-            return personalReport;
+            return getPersonalReportById(prId);
         }
     }
 
     @Override
-    public PersonalReport getDraftByUserIdAndWeek(String userId, int week) {
+    public PersonalReport getDraftByUserIdAndWeek(String userId, int week,int year) {
         QueryWrapper<PersonalReport> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId)
                    .eq("week", week)
-                   .eq("is_deleted", "0");
+                   .eq("is_deleted", "0")
+                   .apply("YEAR(created_at) = {0}", year);
         return personalReportMapper.selectOne(queryWrapper);
     }
 
@@ -303,5 +360,26 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
         return submitter;
+    }
+
+    /**
+     * zjy
+     */
+    @Override
+    @Transactional
+    public ResultBean<PersonalReport> frontPersonalReportCheck(String userId, int week){
+        UserInfo currentUser = UserContext.getCurrentUser();
+        if(!currentUser.getUserId().equals(userId)){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        PersonalReport existingDraft = getDraftByUserIdAndWeek(userId, week,LocalDate.now().getYear());
+        if(existingDraft == null){
+            return ResultBean.success(ResultCode.OPEN_WITHOUT_DATA);
+        }
+        FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());
+        if("1".equals(flowRecord.getReportType()) && "0".equals(flowRecord.getCurrentStatus())){
+            return ResultBean.success(ResultCode.OPEN_WITH_DATA,existingDraft);
+        }
+        return ResultBean.success(ResultCode.NO_OPEN);
     }
 }
