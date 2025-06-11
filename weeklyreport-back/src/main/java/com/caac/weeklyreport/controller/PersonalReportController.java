@@ -3,7 +3,9 @@ package com.caac.weeklyreport.controller;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.PersonalReport;
+import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;
+import com.caac.weeklyreport.entity.vo.StatusVO;
 import com.caac.weeklyreport.service.IPersonalReportService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -73,6 +75,14 @@ public class PersonalReportController {
     public ResultBean<?> getAllStatusPersonalReportForWeek(@PathVariable String userId, @PathVariable int week) {
         //PersonalReport中没有字段区分是否是草稿
         List<PersonalReport> allPersonalReportsForWeek = personalReportService.getAllPersonalReportsForWeek(userId, 2025, week);
+        return ResultBean.success(allPersonalReportsForWeek);
+    }
+
+
+    @ApiOperation(value = "根据状态团队领导查询所有团队成员周报", notes = "根据状态团队领导查询所有团队成员周报")
+    @PostMapping("/approveList")
+    public ResultBean<?> getAllPersonalReportByStatus(@RequestBody StatusVO statusVO) {
+        List<PersonalReportStatusDTO> allPersonalReportsForWeek = personalReportService.getAllPersonalReportByStatus(statusVO.getStatus());
         return ResultBean.success(allPersonalReportsForWeek);
     }
 

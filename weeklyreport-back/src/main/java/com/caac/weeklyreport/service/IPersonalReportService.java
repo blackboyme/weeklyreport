@@ -3,7 +3,8 @@ package com.caac.weeklyreport.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.entity.PersonalReport;
-import com.caac.weeklyreport.entity.dto.StatusPersonalReportDTO;
+import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
+import com.caac.weeklyreport.entity.dto.PersonalReportWeekDTO;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;
 
 import java.util.List;
@@ -27,5 +28,6 @@ public interface IPersonalReportService extends IService<PersonalReport> {
     PersonalReport getDraftByUserIdAndWeek(String userId, int week,int year);
     ResultBean<PersonalReport> frontPersonalReportCheck(String userId, int week);
     List<PersonalReport> getAllPersonalReportsForWeek(String userId, int year, int week);
-    StatusPersonalReportDTO getCurrentStatusAndWeeklyReport();
+    List<PersonalReportStatusDTO> getAllPersonalReportByStatus(String status);
+    PersonalReportWeekDTO getCurrentStatusAndWeeklyReport();
 }

@@ -6,7 +6,8 @@ import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
-import com.caac.weeklyreport.entity.dto.StatusPersonalReportDTO;
+import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
+import com.caac.weeklyreport.entity.dto.PersonalReportWeekDTO;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.FlowHistoryMapper;
@@ -17,6 +18,7 @@ import com.caac.weeklyreport.service.IPersonalReportService;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
 import com.caac.weeklyreport.util.UserContext;
 import com.caac.weeklyreport.util.WeekDateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,28 +93,46 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
     }
 
     @Override
-    public StatusPersonalReportDTO getCurrentStatusAndWeeklyReport() {
-        StatusPersonalReportDTO statusPersonalReportDTO = new StatusPersonalReportDTO();
+    public List<PersonalReportStatusDTO> getAllPersonalReportByStatus(String status) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        User approver = getApprover(userInfo);
+        if(!approver.getUserId().equals(userInfo.getUserId())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        List<PersonalReportStatusDTO> personalReports = null;
+        if(StringUtils.isEmpty(status)){
+            personalReports = personalReportMapper.getAllPersonalReportWithStatus(userInfo.getTeamId(),
+                    WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear());
+        } else {
+            personalReports = personalReportMapper.getPersonalReportByStatus(userInfo.getTeamId(),
+                    WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),status);
+        }
+        return personalReports;
+    }
+
+    @Override
+    public PersonalReportWeekDTO getCurrentStatusAndWeeklyReport() {
+        PersonalReportWeekDTO personalReportWeekDTO = new PersonalReportWeekDTO();
         UserInfo userInfo = UserContext.getCurrentUser();
         int currentWeek =  WeekDateUtils.getCurrentWeekNumber();
         PersonalReport currentPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek,LocalDate.now().getYear());
         if(currentPersonalReport == null){
-            statusPersonalReportDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
+            personalReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
         } else {
             FlowRecord flowRecord = flowRecordMapper.selectById(currentPersonalReport.getFlowId());
             if(flowRecord == null){
                 throw new BusinessException(ResultCode.FLOW_IS_NULL);
             }
-            statusPersonalReportDTO.setCurrentStatus(flowRecord.getCurrentStatus());
-            statusPersonalReportDTO.setCurrentWeekPersonalReport(currentPersonalReport);
+            personalReportWeekDTO.setCurrentStatus(flowRecord.getCurrentStatus());
+            personalReportWeekDTO.setCurrentWeekPersonalReport(currentPersonalReport);
         }
 
         // 当前状态为已通过审批，不能修改
-        if (CommonConstants.CURRENT_STATUS_PASS.equals(statusPersonalReportDTO.getCurrentStatus())
-                || CommonConstants.CURRENT_STATUS_SUBMIT.equals(statusPersonalReportDTO.getCurrentStatus())) {
-            statusPersonalReportDTO.setCanOperate(Boolean.FALSE);
+        if (CommonConstants.CURRENT_STATUS_PASS.equals(personalReportWeekDTO.getCurrentStatus())
+                || CommonConstants.CURRENT_STATUS_SUBMIT.equals(personalReportWeekDTO.getCurrentStatus())) {
+            personalReportWeekDTO.setCanOperate(Boolean.FALSE);
         } else {
-            statusPersonalReportDTO.setCanOperate(Boolean.TRUE);
+            personalReportWeekDTO.setCanOperate(Boolean.TRUE);
         }
 
         PersonalReport lastWeekPersonalReport = null;
@@ -122,9 +142,9 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
         } else {
             lastWeekPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek-1, LocalDate.now().getYear());
         }
-        statusPersonalReportDTO.setLastWeekPersonalReport(lastWeekPersonalReport);
+        personalReportWeekDTO.setLastWeekPersonalReport(lastWeekPersonalReport);
 
-        return statusPersonalReportDTO;
+        return personalReportWeekDTO;
     }
 
     @Override
@@ -348,6 +368,16 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
                    .apply("YEAR(created_at) = {0}", year);
         return personalReportMapper.selectOne(queryWrapper);
     }
+
+
+//    public List<PersonalReport> getAllPersonalReportByTeamIdAndWeekAndYear(String teamId, int week,int year) {
+//        QueryWrapper<PersonalReport> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("team_id", teamId)
+//                .eq("week", week)
+//                .eq("is_deleted", "0")
+//                .apply("YEAR(created_at) = {0}", year);
+//        return personalReportMapper.selectList(queryWrapper);
+//    }
 
 
     public User getApprover(UserInfo userInfo) {
