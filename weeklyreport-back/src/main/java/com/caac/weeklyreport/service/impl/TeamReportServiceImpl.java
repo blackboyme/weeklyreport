@@ -225,43 +225,54 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             teamReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
             List<PersonalReportStatusDTO>  personalReports = personalReportMapper.getPersonalReportByStatus(userInfo.getTeamId(),
                     WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),"2");
+            currentTeamReport = new TeamReport();
+            StringBuilder equip =  new StringBuilder();
+            StringBuilder systemRd = new StringBuilder();
+            StringBuilder construction = new StringBuilder();
+            StringBuilder others = new StringBuilder();
+            StringBuilder nextEquip = new StringBuilder();
+            StringBuilder nextSystem = new StringBuilder();
+            StringBuilder nextConstruction = new StringBuilder();
+            StringBuilder nextOthers = new StringBuilder();
+
             for (int i = 0; i < personalReports.size(); i++) {
-                if(personalReports.size() > 1 && i != personalReports.size() - 1){
-                    String equip = personalReports.get(i).getEquip() + " " + personalReports.get(i).getUserName() + "/n";
-                    String systemRd = personalReports.get(i).getSystemRd() + " " + personalReports.get(i).getUserName() + "/n";
-                    String construction = personalReports.get(i).getConstruction() + " " + personalReports.get(i).getUserName() + "/n";
-                    String others = personalReports.get(i).getOthers() + " " + personalReports.get(i).getUserName() + "/n";
-                    String nextEquip = personalReports.get(i).getNextEquip() + " " + personalReports.get(i).getUserName() + "/n";
-                    String nextSystem = personalReports.get(i).getNextSystem() + " " + personalReports.get(i).getUserName() + "/n";
-                    String nextConstruction = personalReports.get(i).getNextConstruction() + " " + personalReports.get(i).getUserName() + "/n";
-                    String nextOthers = personalReports.get(i).getNextOthers() + " " + personalReports.get(i).getUserName() + "/n";
-                    currentTeamReport.setEquip(equip);
-                    currentTeamReport.setSystemRd(systemRd);
-                    currentTeamReport.setConstruction(construction);
-                    currentTeamReport.setOthers(others);
-                    currentTeamReport.setNextEquip(nextEquip);
-                    currentTeamReport.setNextSystem(nextSystem);
-                    currentTeamReport.setNextConstruction(nextConstruction);
-                    currentTeamReport.setNextOthers(nextOthers);
+                if(personalReports.size() > 1 && i != personalReports.size() - 1 && i != 0){
+                    equip.append(personalReports.get(i).getEquip()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    systemRd.append(currentTeamReport.getSystemRd()).append(personalReports.get(i).getSystemRd()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    construction.append(currentTeamReport.getConstruction()).append(personalReports.get(i).getConstruction()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    others.append(currentTeamReport.getOthers()).append(personalReports.get(i).getOthers()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    nextEquip.append(currentTeamReport.getNextEquip()).append(personalReports.get(i).getNextEquip()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    nextSystem.append(currentTeamReport.getNextSystem()).append(personalReports.get(i).getNextSystem()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    nextConstruction.append(currentTeamReport.getNextConstruction()).append(personalReports.get(i).getNextConstruction()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    nextOthers.append(currentTeamReport.getNextOthers()).append(personalReports.get(i).getNextOthers()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                } else if(i == 0) {
+                    equip.append(personalReports.get(i).getEquip()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    systemRd.append(personalReports.get(i).getSystemRd()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    construction.append(personalReports.get(i).getConstruction()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    others.append(personalReports.get(i).getOthers()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    nextEquip.append(personalReports.get(i).getNextEquip()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    nextSystem.append(personalReports.get(i).getNextSystem()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    nextConstruction.append(personalReports.get(i).getNextConstruction()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    nextOthers.append(personalReports.get(i).getNextOthers()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
                 } else {
-                    String equip = personalReports.get(i).getEquip() + " " + personalReports.get(i).getUserName() ;
-                    String systemRd = personalReports.get(i).getSystemRd() + " " + personalReports.get(i).getUserName() ;
-                    String construction = personalReports.get(i).getConstruction() + " " + personalReports.get(i).getUserName() ;
-                    String others = personalReports.get(i).getOthers() + " " + personalReports.get(i).getUserName() ;
-                    String nextEquip = personalReports.get(i).getNextEquip() + " " + personalReports.get(i).getUserName() ;
-                    String nextSystem = personalReports.get(i).getNextSystem() + " " + personalReports.get(i).getUserName() ;
-                    String nextConstruction = personalReports.get(i).getNextConstruction() + " " + personalReports.get(i).getUserName() ;
-                    String nextOthers = personalReports.get(i).getNextOthers() + " " + personalReports.get(i).getUserName() ;
-                    currentTeamReport.setEquip(equip);
-                    currentTeamReport.setSystemRd(systemRd);
-                    currentTeamReport.setConstruction(construction);
-                    currentTeamReport.setOthers(others);
-                    currentTeamReport.setNextEquip(nextEquip);
-                    currentTeamReport.setNextSystem(nextSystem);
-                    currentTeamReport.setNextConstruction(nextConstruction);
-                    currentTeamReport.setNextOthers(nextOthers);
+                    equip.append(currentTeamReport.getEquip()).append(personalReports.get(i).getEquip()).append(" ").append(personalReports.get(i).getUserName());
+                    systemRd.append(currentTeamReport.getSystemRd()).append(personalReports.get(i).getSystemRd()).append(" ").append(personalReports.get(i).getUserName());
+                    construction.append(currentTeamReport.getConstruction()).append(personalReports.get(i).getConstruction()).append(" ").append(personalReports.get(i).getUserName());
+                    others.append(currentTeamReport.getOthers()).append(personalReports.get(i).getOthers()).append(" ").append(personalReports.get(i).getUserName());
+                    nextEquip.append(currentTeamReport.getNextEquip()).append(personalReports.get(i).getNextEquip()).append(" ").append(personalReports.get(i).getUserName());
+                    nextSystem.append(currentTeamReport.getNextSystem()).append(personalReports.get(i).getNextSystem()).append(" ").append(personalReports.get(i).getUserName());
+                    nextConstruction.append(currentTeamReport.getNextConstruction()).append(personalReports.get(i).getNextConstruction()).append(" ").append(personalReports.get(i).getUserName());
+                    nextOthers.append(currentTeamReport.getNextOthers()).append(personalReports.get(i).getNextOthers()).append(" ").append(personalReports.get(i).getUserName());
                 }
             }
+            currentTeamReport.setEquip(equip.toString());
+            currentTeamReport.setSystemRd(systemRd.toString());
+            currentTeamReport.setConstruction(construction.toString());
+            currentTeamReport.setOthers(others.toString());
+            currentTeamReport.setNextEquip(nextEquip.toString());
+            currentTeamReport.setNextSystem(nextSystem.toString());
+            currentTeamReport.setNextConstruction(nextConstruction.toString());
+            currentTeamReport.setNextOthers(nextOthers.toString());
             teamReportWeekDTO.setCurrentWeekTeamReport(currentTeamReport);
         } else {
             FlowRecord flowRecord = flowRecordMapper.selectById(currentTeamReport.getFlowId());
