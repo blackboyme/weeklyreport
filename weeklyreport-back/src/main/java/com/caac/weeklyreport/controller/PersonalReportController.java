@@ -4,6 +4,8 @@ import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.PersonalReport;
 import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
+import com.caac.weeklyreport.entity.vo.CancelVO;
+import com.caac.weeklyreport.entity.vo.PassVO;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;
 import com.caac.weeklyreport.entity.vo.StatusVO;
 import com.caac.weeklyreport.service.IPersonalReportService;
@@ -61,23 +63,23 @@ public class PersonalReportController {
 //    }
 
 
+
+//    /**
+//     * zjy
+//     * */
+//    @ApiOperation(value = "团队领导查询所有团队成员周报", notes = "团队领导查询所有团队成员周报")
+//    @GetMapping("/approveList/{userId}/{week}")
+//    public ResultBean<?> getAllStatusPersonalReportForWeek(@PathVariable String userId, @PathVariable int week) {
+//        //PersonalReport中没有字段区分是否是草稿
+//        List<PersonalReport> allPersonalReportsForWeek = personalReportService.getAllPersonalReportsForWeek(userId, 2025, week);
+//        return ResultBean.success(allPersonalReportsForWeek);
+//    }
+
     @ApiOperation(value = "员工周报填写-获取当前状态和周报数据", notes = "员工周报填写-获取当前状态和周报数据")
     @GetMapping("/getCurrentStatusAndWeeklyReport")
     public ResultBean<?> getCurrentStatusAndWeeklyReport() {
         return ResultBean.success(personalReportService.getCurrentStatusAndWeeklyReport());
     }
-
-    /**
-     * zjy
-     * */
-    @ApiOperation(value = "团队领导查询所有团队成员周报", notes = "团队领导查询所有团队成员周报")
-    @GetMapping("/approveList/{userId}/{week}")
-    public ResultBean<?> getAllStatusPersonalReportForWeek(@PathVariable String userId, @PathVariable int week) {
-        //PersonalReport中没有字段区分是否是草稿
-        List<PersonalReport> allPersonalReportsForWeek = personalReportService.getAllPersonalReportsForWeek(userId, 2025, week);
-        return ResultBean.success(allPersonalReportsForWeek);
-    }
-
 
     @ApiOperation(value = "根据状态团队领导查询所有团队成员周报", notes = "根据状态团队领导查询所有团队成员周报")
     @PostMapping("/approveList")
@@ -104,6 +106,26 @@ public class PersonalReportController {
         }
         return ResultBean.success(personalReportService.submitPersonalReport(personalReport));
     }
+
+    @ApiOperation(value = "审核通过", notes = "审核通过")
+    @PostMapping("/pass")
+    public ResultBean<?> passPersonalReport(@RequestBody PassVO passVO) {
+        if (StringUtils.isEmpty(passVO.getPrId())) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(personalReportService.passPersonalReport(passVO.getPrId()));
+    }
+
+    @ApiOperation(value = "退回", notes = "退回")
+    @PostMapping("/cancel")
+    public ResultBean<?> cancelPersonalReport(@RequestBody CancelVO cancelVO) {
+        if (StringUtils.isEmpty(cancelVO.getPrId())) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(personalReportService.cancelPersonalReport(cancelVO));
+    }
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<PersonalReport> getPersonalReport(@PathVariable String id) {

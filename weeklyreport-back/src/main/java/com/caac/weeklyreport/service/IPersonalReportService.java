@@ -5,6 +5,7 @@ import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.entity.PersonalReport;
 import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
 import com.caac.weeklyreport.entity.dto.PersonalReportWeekDTO;
+import com.caac.weeklyreport.entity.vo.CancelVO;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;
 
 import java.util.List;
@@ -30,4 +31,6 @@ public interface IPersonalReportService extends IService<PersonalReport> {
     List<PersonalReport> getAllPersonalReportsForWeek(String userId, int year, int week);
     List<PersonalReportStatusDTO> getAllPersonalReportByStatus(String status);
     PersonalReportWeekDTO getCurrentStatusAndWeeklyReport();
+    Boolean passPersonalReport(String prId);
+    Boolean cancelPersonalReport(CancelVO cancelVO);
 }

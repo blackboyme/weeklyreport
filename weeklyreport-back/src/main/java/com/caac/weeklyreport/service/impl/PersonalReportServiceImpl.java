@@ -8,6 +8,7 @@ import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
 import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
 import com.caac.weeklyreport.entity.dto.PersonalReportWeekDTO;
+import com.caac.weeklyreport.entity.vo.CancelVO;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.FlowHistoryMapper;
@@ -145,6 +146,92 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
         personalReportWeekDTO.setLastWeekPersonalReport(lastWeekPersonalReport);
 
         return personalReportWeekDTO;
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean passPersonalReport(String prId) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        if(!userInfo.getRoleType().equals("2")) {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        PersonalReport personalReport = personalReportMapper.selectById(prId);
+        if(personalReport == null){
+            throw new BusinessException(ResultCode.PARAM_IS_ERROR);
+        }
+        FlowRecord flowRecord = flowRecordMapper.selectById(personalReport.getFlowId());
+        if(flowRecord == null){
+            throw new BusinessException(ResultCode.FLOW_IS_NULL);
+        }
+        if(!flowRecord.getCurrentStatus().equals(CommonConstants.CURRENT_STATUS_SUBMIT)){
+            throw new BusinessException(ResultCode.FLOW_ACCESS_PASS);
+        }
+
+        flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);
+        flowRecord.setCurrentStatus(CommonConstants.CURRENT_STATUS_PASS);
+        flowRecord.setUpdatedAt(LocalDateTime.now());
+        int count = flowRecordMapper.updateById(flowRecord);
+
+        //创建新历史记录
+        FlowHistory flowHistory = new FlowHistory();
+        flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+        flowHistory.setFlowId(personalReport.getFlowId());
+        flowHistory.setReportId(personalReport.getPrId());
+        flowHistory.setReportType(CommonConstants.REPORT_TYPE_PERSONAL);//1-个人周报,2-团队周报,3-部门周报
+        flowHistory.setOperation(CommonConstants.OPERATION_PASS);//1-保存为草稿,2-提交,3-通过,4-退回
+        flowHistory.setOperatorId(userInfo.getUserId());
+        flowHistory.setOperatorName(userInfo.getUserName());
+        flowHistory.setOperatorRole(userInfo.getRoleId());
+        flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);
+        flowHistory.setIsDeleted("0");
+
+        flowHistoryMapper.insert(flowHistory);
+
+        return count != 0;
+    }
+
+    @Override
+    public Boolean cancelPersonalReport(CancelVO cancelVO) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        if(!userInfo.getRoleType().equals("2")) {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        PersonalReport personalReport = personalReportMapper.selectById(cancelVO.getPrId());
+        if(personalReport == null){
+            throw new BusinessException(ResultCode.PARAM_IS_ERROR);
+        }
+        FlowRecord flowRecord = flowRecordMapper.selectById(personalReport.getFlowId());
+        if(flowRecord == null){
+            throw new BusinessException(ResultCode.FLOW_IS_NULL);
+        }
+        if(!flowRecord.getCurrentStatus().equals(CommonConstants.CURRENT_STATUS_SUBMIT)){
+            throw new BusinessException(ResultCode.FLOW_ACCESS_PASS);
+        }
+
+        flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL);
+        flowRecord.setCurrentStatus(CommonConstants.CURRENT_STATUS_CANCEL);
+        flowRecord.setComment(cancelVO.getComment());
+        flowRecord.setUpdatedAt(LocalDateTime.now());
+        int count = flowRecordMapper.updateById(flowRecord);
+
+        //创建新历史记录
+        FlowHistory flowHistory = new FlowHistory();
+        flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+        flowHistory.setFlowId(personalReport.getFlowId());
+        flowHistory.setReportId(personalReport.getPrId());
+        flowHistory.setReportType(CommonConstants.REPORT_TYPE_PERSONAL);//1-个人周报,2-团队周报,3-部门周报
+        flowHistory.setOperation(CommonConstants.OPERATION_CANCEL);//1-保存为草稿,2-提交,3-通过,4-退回
+        flowHistory.setOperatorId(userInfo.getUserId());
+        flowHistory.setOperatorName(userInfo.getUserName());
+        flowHistory.setOperatorRole(userInfo.getRoleId());
+        flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL);
+        flowHistory.setComment(cancelVO.getComment());
+        flowHistory.setIsDeleted("0");
+
+        flowHistoryMapper.insert(flowHistory);
+
+        return count != 0;
     }
 
     @Override

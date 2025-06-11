@@ -31,7 +31,6 @@ public interface PersonalReportMapper extends BaseMapper<PersonalReport> {
             "YEAR(pr.created_at) = #{year} " +
             "AND pr.week = #{week} " +
             "AND pr.team_id = #{teamId} " +
-            "AND u.role_id = '1' " +
             "AND fr.current_status = #{status}" +
             "ORDER BY pr.updated_at")
     List<PersonalReportStatusDTO> getPersonalReportByStatus(@Param("teamId")String teamId, @Param("week")int week,
@@ -49,7 +48,6 @@ public interface PersonalReportMapper extends BaseMapper<PersonalReport> {
             "YEAR(pr.created_at) = #{year} " +
             "AND pr.week = #{week} " +
             "AND pr.team_id = #{teamId} " +
-            "AND u.role_id = '1' " +
             "ORDER BY pr.updated_at")
     List<PersonalReportStatusDTO> getAllPersonalReportWithStatus(@Param("teamId")String teamId, @Param("week")int week,
                                                             @Param("year")int year);
