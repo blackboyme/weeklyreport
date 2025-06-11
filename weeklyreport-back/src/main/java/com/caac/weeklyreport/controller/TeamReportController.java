@@ -34,6 +34,13 @@ public class TeamReportController {
         return ResponseEntity.ok(teamReportService.createTeamReport(teamReport));
     }
 
+    @ApiOperation(value = "员工周报填写-获取当前状态和周报数据", notes = "员工周报填写-获取当前状态和周报数据")
+    @GetMapping("/getCurrentStatusAndWeeklyReport")
+    public ResultBean<?> getCurrentStatusAndWeeklyReport() {
+        return ResultBean.success(teamReportService.getCurrentStatusAndWeeklyReport());
+    }
+
+
     @ApiOperation(value = "团队周报保存为草稿", notes = "团队周报保存为草稿")
     @PostMapping("/saveDraft")
     public ResultBean<?> saveTeamReportDraft(@RequestBody TeamReport teamReport) {

@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
+import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
+import com.caac.weeklyreport.entity.dto.PersonalReportWeekDTO;
+import com.caac.weeklyreport.entity.dto.TeamReportWeekDTO;
 import com.caac.weeklyreport.exception.BusinessException;
-import com.caac.weeklyreport.mapper.FlowHistoryMapper;
-import com.caac.weeklyreport.mapper.FlowRecordMapper;
-import com.caac.weeklyreport.mapper.TeamReportMapper;
-import com.caac.weeklyreport.mapper.UserMapper;
+import com.caac.weeklyreport.mapper.*;
 import com.caac.weeklyreport.service.ITeamReportService;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
 import com.caac.weeklyreport.util.UserContext;
@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -45,6 +46,9 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
     @Autowired
     private FlowRecordMapper flowRecordMapper;
 
+    @Autowired
+    private PersonalReportMapper personalReportMapper;
+
     public TeamReportServiceImpl(TeamReportMapper teamReportMapper) {
         this.teamReportMapper = teamReportMapper;
     }
@@ -61,7 +65,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReport.getUserId(), teamReport.getWeek());
+        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReport.getUserId(), teamReport.getWeek(),LocalDate.now().getYear());
 
         if (existingDraft != null) {
             // 更新
@@ -142,7 +146,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
 
         User approver = getApprover();
 
-        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReport.getUserId(), teamReport.getWeek());
+        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReport.getUserId(), teamReport.getWeek(),LocalDate.now().getYear());
 
         if (existingDraft != null) {
             // 更新草稿
@@ -210,6 +214,84 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             return teamReport;
         }
     }
+
+    @Override
+    public TeamReportWeekDTO getCurrentStatusAndWeeklyReport() {
+        TeamReportWeekDTO teamReportWeekDTO = new TeamReportWeekDTO();
+        UserInfo userInfo = UserContext.getCurrentUser();
+        int currentWeek =  WeekDateUtils.getCurrentWeekNumber();
+        TeamReport currentTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek, LocalDate.now().getYear());
+        if(currentTeamReport == null){
+            teamReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
+            List<PersonalReportStatusDTO>  personalReports = personalReportMapper.getPersonalReportByStatus(userInfo.getTeamId(),
+                    WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),"2");
+            for (int i = 0; i < personalReports.size(); i++) {
+                if(personalReports.size() > 1 && i != personalReports.size() - 1){
+                    String equip = personalReports.get(i).getEquip() + " " + personalReports.get(i).getUserName() + "/n";
+                    String systemRd = personalReports.get(i).getSystemRd() + " " + personalReports.get(i).getUserName() + "/n";
+                    String construction = personalReports.get(i).getConstruction() + " " + personalReports.get(i).getUserName() + "/n";
+                    String others = personalReports.get(i).getOthers() + " " + personalReports.get(i).getUserName() + "/n";
+                    String nextEquip = personalReports.get(i).getNextEquip() + " " + personalReports.get(i).getUserName() + "/n";
+                    String nextSystem = personalReports.get(i).getNextSystem() + " " + personalReports.get(i).getUserName() + "/n";
+                    String nextConstruction = personalReports.get(i).getNextConstruction() + " " + personalReports.get(i).getUserName() + "/n";
+                    String nextOthers = personalReports.get(i).getNextOthers() + " " + personalReports.get(i).getUserName() + "/n";
+                    currentTeamReport.setEquip(equip);
+                    currentTeamReport.setSystemRd(systemRd);
+                    currentTeamReport.setConstruction(construction);
+                    currentTeamReport.setOthers(others);
+                    currentTeamReport.setNextEquip(nextEquip);
+                    currentTeamReport.setNextSystem(nextSystem);
+                    currentTeamReport.setNextConstruction(nextConstruction);
+                    currentTeamReport.setNextOthers(nextOthers);
+                } else {
+                    String equip = personalReports.get(i).getEquip() + " " + personalReports.get(i).getUserName() ;
+                    String systemRd = personalReports.get(i).getSystemRd() + " " + personalReports.get(i).getUserName() ;
+                    String construction = personalReports.get(i).getConstruction() + " " + personalReports.get(i).getUserName() ;
+                    String others = personalReports.get(i).getOthers() + " " + personalReports.get(i).getUserName() ;
+                    String nextEquip = personalReports.get(i).getNextEquip() + " " + personalReports.get(i).getUserName() ;
+                    String nextSystem = personalReports.get(i).getNextSystem() + " " + personalReports.get(i).getUserName() ;
+                    String nextConstruction = personalReports.get(i).getNextConstruction() + " " + personalReports.get(i).getUserName() ;
+                    String nextOthers = personalReports.get(i).getNextOthers() + " " + personalReports.get(i).getUserName() ;
+                    currentTeamReport.setEquip(equip);
+                    currentTeamReport.setSystemRd(systemRd);
+                    currentTeamReport.setConstruction(construction);
+                    currentTeamReport.setOthers(others);
+                    currentTeamReport.setNextEquip(nextEquip);
+                    currentTeamReport.setNextSystem(nextSystem);
+                    currentTeamReport.setNextConstruction(nextConstruction);
+                    currentTeamReport.setNextOthers(nextOthers);
+                }
+            }
+            teamReportWeekDTO.setCurrentWeekTeamReport(currentTeamReport);
+        } else {
+            FlowRecord flowRecord = flowRecordMapper.selectById(currentTeamReport.getFlowId());
+            if(flowRecord == null){
+                throw new BusinessException(ResultCode.FLOW_IS_NULL);
+            }
+            teamReportWeekDTO.setCurrentStatus(flowRecord.getCurrentStatus());
+            teamReportWeekDTO.setCurrentWeekTeamReport(currentTeamReport);
+        }
+
+        // 当前状态为已通过审批，不能修改
+        if (CommonConstants.CURRENT_STATUS_PASS.equals(teamReportWeekDTO.getCurrentStatus())
+                || CommonConstants.CURRENT_STATUS_SUBMIT.equals(teamReportWeekDTO.getCurrentStatus())) {
+            teamReportWeekDTO.setCanOperate(Boolean.FALSE);
+        } else {
+            teamReportWeekDTO.setCanOperate(Boolean.TRUE);
+        }
+
+        TeamReport lastWeekTeamReport = null;
+        if (currentWeek == 1) {
+            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(LocalDate.now().getYear()-1);
+            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), lastYearTotalWeek, LocalDate.now().getYear()-1);
+        } else {
+            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek-1, LocalDate.now().getYear());
+        }
+        teamReportWeekDTO.setLastWeekTeamReport(lastWeekTeamReport);
+
+        return teamReportWeekDTO;
+    }
+
     @Override
     public TeamReport createTeamReport(TeamReport teamReport) {
         teamReport.setTrId(UUID.randomUUID().toString());
@@ -248,11 +330,12 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
         teamReportMapper.updateById(teamReport);
     }
     @Override
-    public TeamReport getTeamDraftByUserIdAndWeek(String userId, int week) {
+    public TeamReport getTeamDraftByUserIdAndWeek(String userId, int week,int year)  {
         QueryWrapper<TeamReport> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId)
                 .eq("week", week)
-                .eq("is_deleted", "0");
+                .eq("is_deleted", "0")
+                .apply("YEAR(created_at) = {0}", year);
         return teamReportMapper.selectOne(queryWrapper);
     }
     public User getApprover() {
