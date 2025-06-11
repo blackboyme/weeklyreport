@@ -351,15 +351,11 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
 
 
     public User getApprover(UserInfo userInfo) {
-        User submitter = null;
-        if("1".equals(userInfo.getRoleType())){
-            submitter = userMapper.getTeamApprover(userInfo.getTeamId(),"2");
-        } else if("2".equals(userInfo.getRoleType())){
-            submitter = userMapper.getDeptApprover("3");
+        if("1".equals(userInfo.getRoleType())||"2".equals(userInfo.getRoleType())){
+            return userMapper.getTeamApprover(userInfo.getTeamId(),"2");
         } else {
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
-        return submitter;
     }
 
     /**
