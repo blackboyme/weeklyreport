@@ -3,6 +3,7 @@ package com.caac.weeklyreport.controller;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.TeamReport;
+import com.caac.weeklyreport.entity.vo.TeamReportVO;
 import com.caac.weeklyreport.service.ITeamReportService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +35,7 @@ public class TeamReportController {
         return ResponseEntity.ok(teamReportService.createTeamReport(teamReport));
     }
 
-    @ApiOperation(value = "员工周报填写-获取当前状态和周报数据", notes = "员工周报填写-获取当前状态和周报数据")
+    @ApiOperation(value = "团队周报填写-获取当前状态和周报数据", notes = "团队周报填写-获取当前状态和周报数据")
     @GetMapping("/getCurrentStatusAndWeeklyReport")
     public ResultBean<?> getCurrentStatusAndWeeklyReport() {
         return ResultBean.success(teamReportService.getCurrentStatusAndWeeklyReport());
@@ -43,8 +44,8 @@ public class TeamReportController {
 
     @ApiOperation(value = "团队周报保存为草稿", notes = "团队周报保存为草稿")
     @PostMapping("/saveDraft")
-    public ResultBean<?> saveTeamReportDraft(@RequestBody TeamReport teamReport) {
-        if (StringUtils.isEmpty(teamReport.getUserId()) || teamReport.getWeek() == null) {
+    public ResultBean<?> saveTeamReportDraft(@RequestBody TeamReportVO teamReport) {
+        if (StringUtils.isEmpty(teamReport.getTeamId()) || teamReport.getWeek() == null) {
             return ResultBean.fail(ResultCode.PARAM_IS_NULL);
         }
         return ResultBean.success(teamReportService.saveTeamReportDraft(teamReport));
@@ -52,8 +53,8 @@ public class TeamReportController {
 
     @ApiOperation(value = "团队周报提交", notes = "团队周报提交")
     @PostMapping("/submit")
-    public ResultBean<?> submitPersonalReport(@RequestBody TeamReport teamReport) {
-        if (StringUtils.isEmpty(teamReport.getUserId()) || teamReport.getWeek() == null) {
+    public ResultBean<?> submitPersonalReport(@RequestBody TeamReportVO teamReport) {
+        if (StringUtils.isEmpty(teamReport.getTeamId()) || teamReport.getWeek() == null) {
             return ResultBean.fail(ResultCode.PARAM_IS_NULL);
         }
         return ResultBean.success(teamReportService.submitTeamReport(teamReport));

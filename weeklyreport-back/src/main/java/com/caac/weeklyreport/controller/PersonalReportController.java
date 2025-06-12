@@ -113,7 +113,7 @@ public class PersonalReportController {
         if (StringUtils.isEmpty(passVO.getPrId())) {
             return ResultBean.fail(ResultCode.PARAM_IS_NULL);
         }
-        return ResultBean.success(personalReportService.passPersonalReport(passVO.getPrId()));
+        return ResultBean.success(personalReportService.passPersonalReport(passVO));
     }
 
     @ApiOperation(value = "退回", notes = "退回")

@@ -1,13 +1,25 @@
 package com.caac.weeklyreport.controller;
 
+import cn.binarywang.wx.miniapp.api.WxMaUserService;
+import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import com.caac.weeklyreport.entity.User;
 import com.caac.weeklyreport.entity.UserInfo;
+import com.caac.weeklyreport.entity.dto.PhoneInfo;
 import com.caac.weeklyreport.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +27,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
+
+    @Autowired
+    private WxMaUserService wxMaUserService;
 
     private final UserService userService;
 
@@ -66,6 +81,53 @@ public class UserController {
             return ResponseEntity.ok(userInfo);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("登录失败：用户不存在");
+        }
+    }
+    /*
+    * 新登录接口
+    * */
+    @PostMapping("/api/loginAndGetPhone")
+    public ResponseEntity<?> getPhoneNumber(@RequestBody Map<String, String> request) throws WxErrorException, JsonProcessingException, JsonMappingException {
+        String encryptedData = request.get("encryptedData");
+        String iv = request.get("iv");
+        String code = request.get("code");
+
+        WxMaJscode2SessionResult session = wxMaUserService.getSessionInfo(code);
+        String key = session.getSessionKey();
+        String openid1 = session.getOpenid();
+
+        // 解密encryptedData
+        String phoneNumber = decryptPhoneNumber(encryptedData, key, iv);
+        //{"phoneNumber":"18502820522","purePhoneNumber":"18502820522","countryCode":"86","watermark":{"timestamp":1749630283,"appid":"wxb92b2b0cb5c17a28"}}
+        ObjectMapper objectMapper = new ObjectMapper();
+        // 将JSON字符串转换为PhoneInfo对象
+        PhoneInfo phoneInfo = objectMapper.readValue(phoneNumber, PhoneInfo.class);
+        String number = phoneInfo.getPhoneNumber();
+        if (StringUtils.isEmpty(number)) {
+            return ResponseEntity.badRequest().body("手机号不能为空");
+        }
+        UserInfo userInfo = userService.login(number);
+        if (userInfo != null) {
+            return ResponseEntity.ok(userInfo);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("登录失败：用户不存在");
+        }
+    }
+    private String decryptPhoneNumber(String encryptedData, String sessionKey, String iv) {
+        try {
+            byte[] keyBytes = Base64.getDecoder().decode(sessionKey);
+            byte[] ivBytes = Base64.getDecoder().decode(iv);
+            byte[] encryptedBytes = Base64.getDecoder().decode(encryptedData);
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+            IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+
+            byte[] decrypted = cipher.doFinal(encryptedBytes);
+            return new String(decrypted, "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException("解密失败", e);
         }
     }
 

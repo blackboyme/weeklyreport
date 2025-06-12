@@ -4,14 +4,10 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 @Data
-public class PersonalReportVO {
+public class DeptReportVO {
 
-
-    /**
-     * 员工ID
-     */
-    @TableField("user_id")
-    private String userId;
+    @TableField("dept_id")
+    private String deptId;
 
     /**
      * 周数

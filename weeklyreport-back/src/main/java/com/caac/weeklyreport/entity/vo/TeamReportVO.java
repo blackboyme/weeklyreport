@@ -2,16 +2,11 @@ package com.caac.weeklyreport.entity.vo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
-
 @Data
-public class PersonalReportVO {
+public class TeamReportVO {
 
-
-    /**
-     * 员工ID
-     */
-    @TableField("user_id")
-    private String userId;
+    @TableField("team_id")
+    private String teamId;
 
     /**
      * 周数

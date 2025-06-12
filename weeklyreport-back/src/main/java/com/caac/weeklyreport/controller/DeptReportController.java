@@ -3,6 +3,7 @@ package com.caac.weeklyreport.controller;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.DeptReport;
+import com.caac.weeklyreport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.service.IDeptReportService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -36,8 +37,8 @@ public class DeptReportController {
 
     @ApiOperation(value = "部门周报保存为草稿", notes = "部门周报保存为草稿")
     @PostMapping("/saveDraft")
-    public ResultBean<?> saveDeptReportDraft(@RequestBody DeptReport deptReport) {
-        if (StringUtils.isEmpty(deptReport.getUserId()) || deptReport.getWeek() == null) {
+    public ResultBean<?> saveDeptReportDraft(@RequestBody DeptReportVO deptReport) {
+        if (StringUtils.isEmpty(deptReport.getDeptId()) || deptReport.getWeek() == null) {
             return ResultBean.fail(ResultCode.PARAM_IS_NULL);
         }
         return ResultBean.success(deptReportService.saveDeptReportDraft(deptReport));

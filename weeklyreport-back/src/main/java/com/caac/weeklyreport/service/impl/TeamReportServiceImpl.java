@@ -6,14 +6,15 @@ import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
 import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
-import com.caac.weeklyreport.entity.dto.PersonalReportWeekDTO;
 import com.caac.weeklyreport.entity.dto.TeamReportWeekDTO;
+import com.caac.weeklyreport.entity.vo.TeamReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.*;
 import com.caac.weeklyreport.service.ITeamReportService;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
 import com.caac.weeklyreport.util.UserContext;
 import com.caac.weeklyreport.util.WeekDateUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,26 +56,34 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
 
     /**
      * zjy
-     * */
+     */
     @Transactional
     @Override
-    public TeamReport saveTeamReportDraft(TeamReport teamReport){
+    public TeamReport saveTeamReportDraft(TeamReportVO teamReportVO){
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!userInfo.getUserId().equals(teamReport.getUserId())){
+        if(!userInfo.getTeamId().equals(teamReportVO.getTeamId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReport.getUserId(), teamReport.getWeek(),LocalDate.now().getYear());
+        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReportVO.getTeamId(), teamReportVO.getWeek(),LocalDate.now().getYear());
 
         if (existingDraft != null) {
-            // 更新
-            teamReport.setTrId(existingDraft.getTrId());
-            teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(teamReport.getWeek()));
-            teamReport.setEndDate(WeekDateUtils.getEndDateOfWeek(teamReport.getWeek()));
-            teamReport.setUpdatedAt(LocalDateTime.now());
-            teamReport.setIsDeleted("0");
-            teamReportMapper.updateById(teamReport);
+            FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());
+            if (flowRecord == null) {
+                throw new BusinessException(ResultCode.FLOW_IS_NULL);
+            }
+
+            // 当前状态为已通过审批，不能修改
+            if (CommonConstants.CURRENT_STATUS_PASS.equals(flowRecord.getCurrentStatus())) {
+                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_PASS);
+            } else if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(flowRecord.getCurrentStatus())) {
+                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_SUBMIT);
+            }
+
+            BeanUtils.copyProperties(teamReportVO, existingDraft);
+            existingDraft.setUpdatedAt(LocalDateTime.now());
+            teamReportMapper.updateById(existingDraft);
 
             //创建新历史记录
             FlowHistory flowHistory = new FlowHistory();
@@ -86,7 +95,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             flowHistory.setOperatorId(userInfo.getUserId());
             flowHistory.setOperatorName(userInfo.getUserName());
             flowHistory.setOperatorRole(userInfo.getRoleId());
-            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL);
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);
             flowHistory.setIsDeleted("0");
 
             flowHistoryMapper.insert(flowHistory);
@@ -96,9 +105,15 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             String flowId = KeyGeneratorUtil.generateUUID();
             String trId = KeyGeneratorUtil.generateUUID();
 
+            TeamReport teamReport = new TeamReport();
+            BeanUtils.copyProperties(teamReportVO, teamReport);
             // 创建新草稿
             teamReport.setTrId(trId);
             teamReport.setFlowId(flowId);
+            teamReport.setUserName(userInfo.getUserName());
+            teamReport.setTeamId(userInfo.getTeamId());
+            teamReport.setTeamName(userInfo.getTeamName());
+            teamReport.setDeptName(userInfo.getDepartName());
             teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(teamReport.getWeek()));
             teamReport.setEndDate(WeekDateUtils.getEndDateOfWeek(teamReport.getWeek()));
             teamReport.setCreatedAt(LocalDateTime.now());
@@ -112,7 +127,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             flowRecord.setReportId(trId);
             flowRecord.setReportType(CommonConstants.REPORT_TYPE_TEAM); //1-个人周报,2-团队周报,3-部门周报
             flowRecord.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT); //1-草稿，2-待审核，3.-已审核，4-已退回
-            flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL); //1-员工提交,2-团队审核,3-部门审核
+            flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM); //1-员工提交,2-团队审核,3-部门审核
             flowRecord.setSubmitterId(userInfo.getUserId());
             flowRecord.setSubmitterName(userInfo.getUserName());
             flowRecord.setIsDeleted("0");
@@ -123,12 +138,12 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
             flowHistory.setFlowId(flowId);
             flowHistory.setReportId(trId);
-            flowHistory.setReportType(CommonConstants.REPORT_TYPE_PERSONAL);//1-个人周报,2-团队周报,3-部门周报
+            flowHistory.setReportType(CommonConstants.REPORT_TYPE_TEAM);//1-个人周报,2-团队周报,3-部门周报
             flowHistory.setOperation(CommonConstants.OPERATION_DRAFT);//1-保存为草稿,2-提交,3-通过,4-退回
             flowHistory.setOperatorId(userInfo.getUserId());
             flowHistory.setOperatorName(userInfo.getUserName());
             flowHistory.setOperatorRole(userInfo.getRoleId());
-            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL);
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);
             flowHistory.setIsDeleted("0");
             flowHistoryMapper.insert(flowHistory);
 
@@ -137,28 +152,40 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
 
     }
     @Override
-    public TeamReport submitTeamReport(TeamReport teamReport){
+    public TeamReport submitTeamReport(TeamReportVO teamReportVO){
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!userInfo.getUserId().equals(teamReport.getUserId())){
+        if(!userInfo.getTeamId().equals(teamReportVO.getTeamId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        User approver = getApprover();
+        User approver = getApprover(userInfo);
 
-        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReport.getUserId(), teamReport.getWeek(),LocalDate.now().getYear());
+        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReportVO.getTeamId(), teamReportVO.getWeek(),LocalDate.now().getYear());
 
         if (existingDraft != null) {
+            FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());
+            if (flowRecord == null) {
+                throw new BusinessException(ResultCode.FLOW_IS_NULL);
+            }
+
+            // 当前状态为已通过审批，不能修改
+            if (CommonConstants.CURRENT_STATUS_PASS.equals(flowRecord.getCurrentStatus())) {
+                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_PASS);
+            } else if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(flowRecord.getCurrentStatus())) {
+                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_SUBMIT);
+            }
+
             // 更新草稿
-            teamReport.setTrId(existingDraft.getTrId());
-            teamReport.setUpdatedAt(LocalDateTime.now());
-            teamReport.setIsDeleted("0");
-            teamReportMapper.updateById(teamReport);
+            BeanUtils.copyProperties(teamReportVO, existingDraft);
+            teamReportMapper.updateById(existingDraft);
 
             //创建新历史记录
             FlowHistory flowHistory = new FlowHistory();
-            flowHistory.setFlowId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setFlowId(existingDraft.getFlowId());
             flowHistory.setReportId(existingDraft.getTrId());
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM); //1-员工提交,2-团队审核,3-部门审核
             flowHistory.setReportType(CommonConstants.REPORT_TYPE_TEAM);//1-个人周报,2-团队周报,3-部门周报
             flowHistory.setOperation(CommonConstants.OPERATION_SUBMIT);//1-保存为草稿,2-提交,3-通过,4-退回
             flowHistory.setOperatorId(userInfo.getUserId());
@@ -176,10 +203,19 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             String trId = KeyGeneratorUtil.generateUUID();
 
             // 创建新草稿
+            TeamReport teamReport = new TeamReport();
+            BeanUtils.copyProperties(teamReportVO, teamReport);
+            // 创建新草稿
             teamReport.setTrId(trId);
             teamReport.setFlowId(flowId);
+            teamReport.setUserName(userInfo.getUserName());
+            teamReport.setTeamId(userInfo.getTeamId());
+            teamReport.setTeamName(userInfo.getTeamName());
+            teamReport.setDeptName(userInfo.getDepartName());
             teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(teamReport.getWeek()));
             teamReport.setEndDate(WeekDateUtils.getEndDateOfWeek(teamReport.getWeek()));
+            teamReport.setCreatedAt(LocalDateTime.now());
+            teamReport.setUpdatedAt(LocalDateTime.now());
             teamReport.setIsDeleted("0");
             teamReportMapper.insert(teamReport);
 
@@ -207,11 +243,11 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             flowHistory.setOperatorId(userInfo.getUserId());
             flowHistory.setOperatorName(userInfo.getUserName());
             flowHistory.setOperatorRole(userInfo.getRoleId());
-            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);//1-员工提交, 2-团队审核, 3-部门审核
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);
             flowHistory.setIsDeleted("0");
             flowHistoryMapper.insert(flowHistory);
 
-            return teamReport;
+            return getTeamReportById(trId);
         }
     }
 
@@ -237,7 +273,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
 
             for (int i = 0; i < personalReports.size(); i++) {
                 if(personalReports.size() > 1 && i != personalReports.size() - 1 && i != 0){
-                    equip.append(personalReports.get(i).getEquip()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
+                    equip.append(personalReports.get(i).getEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
                     systemRd.append(currentTeamReport.getSystemRd()).append(personalReports.get(i).getSystemRd()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
                     construction.append(currentTeamReport.getConstruction()).append(personalReports.get(i).getConstruction()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
                     others.append(currentTeamReport.getOthers()).append(personalReports.get(i).getOthers()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
@@ -341,15 +377,20 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
         teamReportMapper.updateById(teamReport);
     }
     @Override
-    public TeamReport getTeamDraftByUserIdAndWeek(String userId, int week,int year)  {
+    public TeamReport getTeamDraftByUserIdAndWeek(String teamId, int week,int year)  {
         QueryWrapper<TeamReport> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId)
+        queryWrapper.eq("team_id", teamId)
                 .eq("week", week)
                 .eq("is_deleted", "0")
                 .apply("YEAR(created_at) = {0}", year);
         return teamReportMapper.selectOne(queryWrapper);
     }
-    public User getApprover() {
-        return userMapper.getDeptApprover("3");
+
+    public User getApprover(UserInfo userInfo) {
+        if("1".equals(userInfo.getRoleType())||"2".equals(userInfo.getRoleType())){
+            return userMapper.getTeamApprover(userInfo.getTeamId(),"2");
+        } else {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
     }
 }

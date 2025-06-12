@@ -9,6 +9,7 @@ import com.caac.weeklyreport.entity.*;
 import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
 import com.caac.weeklyreport.entity.dto.PersonalReportWeekDTO;
 import com.caac.weeklyreport.entity.vo.CancelVO;
+import com.caac.weeklyreport.entity.vo.PassVO;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.FlowHistoryMapper;
@@ -128,7 +129,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             personalReportWeekDTO.setCurrentWeekPersonalReport(currentPersonalReport);
         }
 
-        // 当前状态为已通过审批，不能修改
+        // 当前状态为：已提交、已通过审批、已被拒绝，都不能修改
         if (CommonConstants.CURRENT_STATUS_PASS.equals(personalReportWeekDTO.getCurrentStatus())
                 || CommonConstants.CURRENT_STATUS_SUBMIT.equals(personalReportWeekDTO.getCurrentStatus())) {
             personalReportWeekDTO.setCanOperate(Boolean.FALSE);
@@ -151,12 +152,12 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean passPersonalReport(String prId) {
+    public Boolean passPersonalReport(PassVO passVO) {
         UserInfo userInfo = UserContext.getCurrentUser();
         if(!userInfo.getRoleType().equals("2")) {
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
-        PersonalReport personalReport = personalReportMapper.selectById(prId);
+        PersonalReport personalReport = personalReportMapper.selectById(passVO.getPrId());
         if(personalReport == null){
             throw new BusinessException(ResultCode.PARAM_IS_ERROR);
         }
@@ -170,6 +171,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
 
         flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);
         flowRecord.setCurrentStatus(CommonConstants.CURRENT_STATUS_PASS);
+        flowRecord.setComment(passVO.getComment());
         flowRecord.setUpdatedAt(LocalDateTime.now());
         int count = flowRecordMapper.updateById(flowRecord);
 
@@ -259,7 +261,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReportVO.getUserId(), personalReportVO.getWeek(),LocalDate.now().getYear());
+        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReportVO.getUserId(), personalReportVO.getWeek(), LocalDate.now().getYear());
 
         if (existingDraft != null) {
             FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());

@@ -8,6 +8,7 @@ import com.caac.weeklyreport.entity.DeptReport;
 import com.caac.weeklyreport.entity.FlowHistory;
 import com.caac.weeklyreport.entity.FlowRecord;
 import com.caac.weeklyreport.entity.UserInfo;
+import com.caac.weeklyreport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.DeptReportMapper;
 import com.caac.weeklyreport.mapper.FlowHistoryMapper;
@@ -16,6 +17,7 @@ import com.caac.weeklyreport.service.IDeptReportService;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
 import com.caac.weeklyreport.util.UserContext;
 import com.caac.weeklyreport.util.WeekDateUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,23 +61,32 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
 
     @Override
     @Transactional
-    public DeptReport saveDeptReportDraft(DeptReport deptReport) {
+    public DeptReport saveDeptReportDraft(DeptReportVO deptReportVO) {
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!userInfo.getUserId().equals(deptReport.getUserId())){
-            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
-        }
+        //userInfo中缺少部门ID deptId
+//        if(!userInfo.get().equals(deptReportVO.getDeptId())){
+//            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+//        }
 
-        DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReport.getUserId(), deptReport.getWeek());
+        DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), deptReportVO.getWeek());
 
         if (existingDraft != null) {
-            // 更新
-            deptReport.setDrId(existingDraft.getDrId());
-            deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(deptReport.getWeek()));
-            deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(deptReport.getWeek()));
-            deptReport.setUpdatedAt(LocalDateTime.now());
-            deptReport.setIsDeleted("0");
-            deptReportMapper.updateById(deptReport);
+            FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());
+            if (flowRecord == null) {
+                throw new BusinessException(ResultCode.FLOW_IS_NULL);
+            }
+
+            // 当前状态为已通过审批，不能修改
+//            if (CommonConstants.CURRENT_STATUS_PASS.equals(flowRecord.getCurrentStatus())) {
+//                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_PASS);
+//            } else if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(flowRecord.getCurrentStatus())) {
+//                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_SUBMIT);
+//            }
+
+            BeanUtils.copyProperties(deptReportVO, existingDraft);
+            existingDraft.setUpdatedAt(LocalDateTime.now());
+            deptReportMapper.updateById(existingDraft);
 
             //创建新历史记录
             FlowHistory flowHistory = new FlowHistory();
@@ -97,9 +108,15 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             String flowId = KeyGeneratorUtil.generateUUID();
             String drId = KeyGeneratorUtil.generateUUID();
 
+            DeptReport deptReport = new DeptReport();
+            BeanUtils.copyProperties(deptReportVO, deptReport);
             // 创建新草稿
             deptReport.setDrId(drId);
             deptReport.setFlowId(flowId);
+            deptReport.setUserName(userInfo.getUserName());
+            deptReport.setTeamId(userInfo.getTeamId());
+            deptReport.setTeamName(userInfo.getTeamName());
+            deptReport.setDeptName(userInfo.getDepartName());
             deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(deptReport.getWeek()));
             deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(deptReport.getWeek()));
             deptReport.setCreatedAt(LocalDateTime.now());
@@ -124,12 +141,12 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
             flowHistory.setFlowId(flowId);
             flowHistory.setReportId(drId);
-            flowHistory.setReportType(CommonConstants.REPORT_TYPE_PERSONAL);//1-个人周报,2-团队周报,3-部门周报
+            flowHistory.setReportType(CommonConstants.REPORT_TYPE_DEPT);//1-个人周报,2-团队周报,3-部门周报
             flowHistory.setOperation(CommonConstants.OPERATION_DRAFT);//1-保存为草稿,2-提交,3-通过,4-退回
             flowHistory.setOperatorId(userInfo.getUserId());
             flowHistory.setOperatorName(userInfo.getUserName());
             flowHistory.setOperatorRole(userInfo.getRoleId());
-            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL);
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_DEPT);
             flowHistory.setIsDeleted("0");
             flowHistoryMapper.insert(flowHistory);
 
@@ -166,9 +183,9 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
     }
 
     @Override
-    public DeptReport getDeptDraftByUserIdAndWeek(String userId, int week) {
+    public DeptReport getDeptDraftByUserIdAndWeek(String deptId, int week) {
         QueryWrapper<DeptReport> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId)
+        queryWrapper.eq("dept_id", deptId)
                 .eq("week", week)
                 .eq("is_deleted", "0");
         return deptReportMapper.selectOne(queryWrapper);
