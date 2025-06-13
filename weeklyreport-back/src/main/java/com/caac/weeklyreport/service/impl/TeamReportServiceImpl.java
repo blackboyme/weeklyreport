@@ -7,6 +7,8 @@ import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
 import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
 import com.caac.weeklyreport.entity.dto.TeamReportWeekDTO;
+import com.caac.weeklyreport.entity.vo.CancelVO;
+import com.caac.weeklyreport.entity.vo.PassVO;
 import com.caac.weeklyreport.entity.vo.TeamReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.*;
@@ -252,65 +254,102 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean passTeamReport(PassVO passVO) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        if(!userInfo.getRoleType().equals("2")) {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        TeamReport teamReport = teamReportMapper.selectById(passVO.getTrId());
+        if(teamReport == null){
+            throw new BusinessException(ResultCode.PARAM_IS_ERROR);
+        }
+        FlowRecord flowRecord = flowRecordMapper.selectById(teamReport.getFlowId());
+        if(flowRecord == null){
+            throw new BusinessException(ResultCode.FLOW_IS_NULL);
+        }
+        if(!flowRecord.getCurrentStatus().equals(CommonConstants.CURRENT_STATUS_SUBMIT)){
+            throw new BusinessException(ResultCode.FLOW_ACCESS_PASS);
+        }
+
+        flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);
+        flowRecord.setCurrentStatus(CommonConstants.CURRENT_STATUS_PASS);
+        flowRecord.setComment(passVO.getComment());
+        flowRecord.setUpdatedAt(LocalDateTime.now());
+        int count = flowRecordMapper.updateById(flowRecord);
+
+        //创建新历史记录
+        FlowHistory flowHistory = new FlowHistory();
+        flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+        flowHistory.setFlowId(teamReport.getFlowId());
+        flowHistory.setReportId(teamReport.getTrId());
+        flowHistory.setReportType(CommonConstants.REPORT_TYPE_TEAM);//1-个人周报,2-团队周报,3-部门周报
+        flowHistory.setOperation(CommonConstants.OPERATION_PASS);//1-保存为草稿,2-提交,3-通过,4-退回
+        flowHistory.setOperatorId(userInfo.getUserId());
+        flowHistory.setOperatorName(userInfo.getUserName());
+        flowHistory.setOperatorRole(userInfo.getRoleId());
+        flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);
+        flowHistory.setIsDeleted("0");
+
+        flowHistoryMapper.insert(flowHistory);
+
+        return count != 0;
+    }
+
+    @Override
+    public Boolean cancelTeamReport(CancelVO cancelVO) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        if(!userInfo.getRoleType().equals("2")) {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        TeamReport teamReport = teamReportMapper.selectById(cancelVO.getTrId());
+        if(teamReport == null){
+            throw new BusinessException(ResultCode.PARAM_IS_ERROR);
+        }
+        FlowRecord flowRecord = flowRecordMapper.selectById(teamReport.getFlowId());
+        if(flowRecord == null){
+            throw new BusinessException(ResultCode.FLOW_IS_NULL);
+        }
+        if(!flowRecord.getCurrentStatus().equals(CommonConstants.CURRENT_STATUS_SUBMIT)){
+            throw new BusinessException(ResultCode.FLOW_ACCESS_PASS);
+        }
+
+        flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_TEAM);
+        flowRecord.setCurrentStatus(CommonConstants.CURRENT_STATUS_CANCEL);
+        flowRecord.setComment(cancelVO.getComment());
+        flowRecord.setUpdatedAt(LocalDateTime.now());
+        int count = flowRecordMapper.updateById(flowRecord);
+
+        //创建新历史记录
+        FlowHistory flowHistory = new FlowHistory();
+        flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+        flowHistory.setFlowId(teamReport.getFlowId());
+        flowHistory.setReportId(teamReport.getTrId());
+        flowHistory.setReportType(CommonConstants.REPORT_TYPE_TEAM);//1-个人周报,2-团队周报,3-部门周报
+        flowHistory.setOperation(CommonConstants.OPERATION_CANCEL);//1-保存为草稿,2-提交,3-通过,4-退回
+        flowHistory.setOperatorId(userInfo.getUserId());
+        flowHistory.setOperatorName(userInfo.getUserName());
+        flowHistory.setOperatorRole(userInfo.getRoleId());
+        flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_PERSONAL);
+        flowHistory.setComment(cancelVO.getComment());
+        flowHistory.setIsDeleted("0");
+
+        flowHistoryMapper.insert(flowHistory);
+
+        return count != 0;
+    }
+
+    @Override
     public TeamReportWeekDTO getCurrentStatusAndWeeklyReport() {
         TeamReportWeekDTO teamReportWeekDTO = new TeamReportWeekDTO();
         UserInfo userInfo = UserContext.getCurrentUser();
         int currentWeek =  WeekDateUtils.getCurrentWeekNumber();
-        TeamReport currentTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek, LocalDate.now().getYear());
+        TeamReport currentTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getTeamId(), currentWeek, LocalDate.now().getYear());
+        // 没有暂存团队周报
         if(currentTeamReport == null){
             teamReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
-            List<PersonalReportStatusDTO>  personalReports = personalReportMapper.getPersonalReportByStatus(userInfo.getTeamId(),
-                    WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),"2");
-            currentTeamReport = new TeamReport();
-            StringBuilder equip =  new StringBuilder();
-            StringBuilder systemRd = new StringBuilder();
-            StringBuilder construction = new StringBuilder();
-            StringBuilder others = new StringBuilder();
-            StringBuilder nextEquip = new StringBuilder();
-            StringBuilder nextSystem = new StringBuilder();
-            StringBuilder nextConstruction = new StringBuilder();
-            StringBuilder nextOthers = new StringBuilder();
-
-            for (int i = 0; i < personalReports.size(); i++) {
-                if(personalReports.size() > 1 && i != personalReports.size() - 1 && i != 0){
-                    equip.append(personalReports.get(i).getEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                    systemRd.append(currentTeamReport.getSystemRd()).append(personalReports.get(i).getSystemRd()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    construction.append(currentTeamReport.getConstruction()).append(personalReports.get(i).getConstruction()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    others.append(currentTeamReport.getOthers()).append(personalReports.get(i).getOthers()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    nextEquip.append(currentTeamReport.getNextEquip()).append(personalReports.get(i).getNextEquip()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    nextSystem.append(currentTeamReport.getNextSystem()).append(personalReports.get(i).getNextSystem()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    nextConstruction.append(currentTeamReport.getNextConstruction()).append(personalReports.get(i).getNextConstruction()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    nextOthers.append(currentTeamReport.getNextOthers()).append(personalReports.get(i).getNextOthers()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                } else if(i == 0) {
-                    equip.append(personalReports.get(i).getEquip()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    systemRd.append(personalReports.get(i).getSystemRd()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    construction.append(personalReports.get(i).getConstruction()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    others.append(personalReports.get(i).getOthers()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    nextEquip.append(personalReports.get(i).getNextEquip()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    nextSystem.append(personalReports.get(i).getNextSystem()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    nextConstruction.append(personalReports.get(i).getNextConstruction()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                    nextOthers.append(personalReports.get(i).getNextOthers()).append(" ").append(personalReports.get(i).getUserName()).append("/n");
-                } else {
-                    equip.append(currentTeamReport.getEquip()).append(personalReports.get(i).getEquip()).append(" ").append(personalReports.get(i).getUserName());
-                    systemRd.append(currentTeamReport.getSystemRd()).append(personalReports.get(i).getSystemRd()).append(" ").append(personalReports.get(i).getUserName());
-                    construction.append(currentTeamReport.getConstruction()).append(personalReports.get(i).getConstruction()).append(" ").append(personalReports.get(i).getUserName());
-                    others.append(currentTeamReport.getOthers()).append(personalReports.get(i).getOthers()).append(" ").append(personalReports.get(i).getUserName());
-                    nextEquip.append(currentTeamReport.getNextEquip()).append(personalReports.get(i).getNextEquip()).append(" ").append(personalReports.get(i).getUserName());
-                    nextSystem.append(currentTeamReport.getNextSystem()).append(personalReports.get(i).getNextSystem()).append(" ").append(personalReports.get(i).getUserName());
-                    nextConstruction.append(currentTeamReport.getNextConstruction()).append(personalReports.get(i).getNextConstruction()).append(" ").append(personalReports.get(i).getUserName());
-                    nextOthers.append(currentTeamReport.getNextOthers()).append(personalReports.get(i).getNextOthers()).append(" ").append(personalReports.get(i).getUserName());
-                }
-            }
-            currentTeamReport.setEquip(equip.toString());
-            currentTeamReport.setSystemRd(systemRd.toString());
-            currentTeamReport.setConstruction(construction.toString());
-            currentTeamReport.setOthers(others.toString());
-            currentTeamReport.setNextEquip(nextEquip.toString());
-            currentTeamReport.setNextSystem(nextSystem.toString());
-            currentTeamReport.setNextConstruction(nextConstruction.toString());
-            currentTeamReport.setNextOthers(nextOthers.toString());
             teamReportWeekDTO.setCurrentWeekTeamReport(currentTeamReport);
-        } else {
+        } else {// 有暂存或以提交的团队周报
             FlowRecord flowRecord = flowRecordMapper.selectById(currentTeamReport.getFlowId());
             if(flowRecord == null){
                 throw new BusinessException(ResultCode.FLOW_IS_NULL);
@@ -319,22 +358,75 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             teamReportWeekDTO.setCurrentWeekTeamReport(currentTeamReport);
         }
 
-        // 当前状态为已通过审批，不能修改
+        // 当前状态为已通过审批、已提交，前端不允许用户打开
         if (CommonConstants.CURRENT_STATUS_PASS.equals(teamReportWeekDTO.getCurrentStatus())
                 || CommonConstants.CURRENT_STATUS_SUBMIT.equals(teamReportWeekDTO.getCurrentStatus())) {
             teamReportWeekDTO.setCanOperate(Boolean.FALSE);
         } else {
             teamReportWeekDTO.setCanOperate(Boolean.TRUE);
         }
+        // 封装拼接数据
+        List<PersonalReportStatusDTO>  personalReports = personalReportMapper.getPersonalReportByStatus(userInfo.getTeamId(),
+                    WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),"3");
+        currentTeamReport = new TeamReport();
+        StringBuilder equip =  new StringBuilder();
+        StringBuilder systemRd = new StringBuilder();
+        StringBuilder construction = new StringBuilder();
+        StringBuilder others = new StringBuilder();
+        StringBuilder nextEquip = new StringBuilder();
+        StringBuilder nextSystem = new StringBuilder();
+        StringBuilder nextConstruction = new StringBuilder();
+        StringBuilder nextOthers = new StringBuilder();
 
-        TeamReport lastWeekTeamReport = null;
-        if (currentWeek == 1) {
-            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(LocalDate.now().getYear()-1);
-            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), lastYearTotalWeek, LocalDate.now().getYear()-1);
-        } else {
-            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek-1, LocalDate.now().getYear());
+        for (int i = 0; i < personalReports.size(); i++) {
+            if(personalReports.size() > 1 && i != personalReports.size() - 1 && i != 0){
+                equip.append(personalReports.get(i).getEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                systemRd.append(personalReports.get(i).getSystemRd()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                construction.append(personalReports.get(i).getConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                others.append(personalReports.get(i).getOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                nextEquip.append(personalReports.get(i).getNextEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                nextSystem.append(personalReports.get(i).getNextSystem()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                nextConstruction.append(personalReports.get(i).getNextConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                nextOthers.append(personalReports.get(i).getNextOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+            } else if(i == 0) {
+                equip.append(personalReports.get(i).getEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                systemRd.append(personalReports.get(i).getSystemRd()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                construction.append(personalReports.get(i).getConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                others.append(personalReports.get(i).getOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                nextEquip.append(personalReports.get(i).getNextEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                nextSystem.append(personalReports.get(i).getNextSystem()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                nextConstruction.append(personalReports.get(i).getNextConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+                nextOthers.append(personalReports.get(i).getNextOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
+            } else {
+                equip.append(personalReports.get(i).getEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")");
+                systemRd.append(personalReports.get(i).getSystemRd()).append(" ").append("("+personalReports.get(i).getUserName()+")");
+                construction.append(personalReports.get(i).getConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")");
+                others.append(personalReports.get(i).getOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")");
+                nextEquip.append(personalReports.get(i).getNextEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")");
+                nextSystem.append(personalReports.get(i).getNextSystem()).append(" ").append("("+personalReports.get(i).getUserName()+")");
+                nextConstruction.append(personalReports.get(i).getNextConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")");
+                nextOthers.append(personalReports.get(i).getNextOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")");
+            }
         }
+        TeamReport lastWeekTeamReport = new TeamReport();
+        lastWeekTeamReport.setEquip(equip.toString());
+        lastWeekTeamReport.setSystemRd(systemRd.toString());
+        lastWeekTeamReport.setConstruction(construction.toString());
+        lastWeekTeamReport.setOthers(others.toString());
+        lastWeekTeamReport.setNextEquip(nextEquip.toString());
+        lastWeekTeamReport.setNextSystem(nextSystem.toString());
+        lastWeekTeamReport.setNextConstruction(nextConstruction.toString());
+        lastWeekTeamReport.setNextOthers(nextOthers.toString());
         teamReportWeekDTO.setLastWeekTeamReport(lastWeekTeamReport);
+
+//        TeamReport lastWeekTeamReport = null;
+//        if (currentWeek == 1) {
+//            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(LocalDate.now().getYear()-1);
+//            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), lastYearTotalWeek, LocalDate.now().getYear()-1);
+//        } else {
+//            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek-1, LocalDate.now().getYear());
+//        }
+//        teamReportWeekDTO.setLastWeekTeamReport(lastWeekTeamReport);
 
         return teamReportWeekDTO;
     }

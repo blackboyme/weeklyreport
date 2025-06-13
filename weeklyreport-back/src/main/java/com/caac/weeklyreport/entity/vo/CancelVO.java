@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class CancelVO {
     private String prId;
+    private String trId;
     private String comment;
 }

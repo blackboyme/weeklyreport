@@ -3,6 +3,8 @@ package com.caac.weeklyreport.controller;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.TeamReport;
+import com.caac.weeklyreport.entity.vo.CancelVO;
+import com.caac.weeklyreport.entity.vo.PassVO;
 import com.caac.weeklyreport.entity.vo.TeamReportVO;
 import com.caac.weeklyreport.service.ITeamReportService;
 import io.swagger.annotations.ApiOperation;
@@ -58,6 +60,24 @@ public class TeamReportController {
             return ResultBean.fail(ResultCode.PARAM_IS_NULL);
         }
         return ResultBean.success(teamReportService.submitTeamReport(teamReport));
+    }
+
+    @ApiOperation(value = "团队周报审核通过", notes = "团队审核通过")
+    @PostMapping("/pass")
+    public ResultBean<?> passPersonalReport(@RequestBody PassVO passVO) {
+        if (StringUtils.isEmpty(passVO.getTrId())) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(teamReportService.passTeamReport(passVO));
+    }
+
+    @ApiOperation(value = "团队周报退回", notes = "团队周报退回")
+    @PostMapping("/cancel")
+    public ResultBean<?> cancelPersonalReport(@RequestBody CancelVO cancelVO) {
+        if (StringUtils.isEmpty(cancelVO.getTrId())) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(teamReportService.cancelTeamReport(cancelVO));
     }
 
     @GetMapping("/{id}")
