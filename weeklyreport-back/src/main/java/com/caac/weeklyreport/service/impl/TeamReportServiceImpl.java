@@ -6,6 +6,7 @@ import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
 import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
+import com.caac.weeklyreport.entity.dto.TeamReportStatusDTO;
 import com.caac.weeklyreport.entity.dto.TeamReportWeekDTO;
 import com.caac.weeklyreport.entity.vo.CancelVO;
 import com.caac.weeklyreport.entity.vo.PassVO;
@@ -429,6 +430,27 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
 //        teamReportWeekDTO.setLastWeekTeamReport(lastWeekTeamReport);
 
         return teamReportWeekDTO;
+    }
+
+    @Override
+    public TeamReportStatusDTO getWeeklyReportByTime(int year, int week) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        if(!"2".equals(userInfo.getRoleType())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        TeamReport teamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), week,year);
+        if(teamReport == null){
+            throw new BusinessException(ResultCode.REPORT_IS_NULL);
+        }
+        FlowRecord flowRecord = flowRecordMapper.selectById(teamReport.getFlowId());
+        if(flowRecord == null){
+            throw new BusinessException(ResultCode.FLOW_IS_NULL);
+        }
+        TeamReportStatusDTO teamReportStatusDTO = new TeamReportStatusDTO();
+        BeanUtils.copyProperties(teamReport, teamReportStatusDTO);
+        teamReportStatusDTO.setStatus(flowRecord.getCurrentStatus());
+
+        return teamReportStatusDTO;
     }
 
     @Override

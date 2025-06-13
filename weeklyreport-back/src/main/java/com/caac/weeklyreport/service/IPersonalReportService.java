@@ -32,6 +32,7 @@ public interface IPersonalReportService extends IService<PersonalReport> {
     List<PersonalReport> getAllPersonalReportsForWeek(String userId, int year, int week);
     List<PersonalReportStatusDTO> getAllPersonalReportByStatus(String status);
     PersonalReportWeekDTO getCurrentStatusAndWeeklyReport();
+    PersonalReportStatusDTO getWeeklyReportByTime(int year, int week);
     Boolean passPersonalReport(PassVO passVO);
     Boolean cancelPersonalReport(CancelVO cancelVO);
 }

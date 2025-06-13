@@ -35,6 +35,12 @@ public class DeptReportController {
         return ResponseEntity.ok(deptReportService.createDeptReport(deptReport));
     }
 
+    @ApiOperation(value = "根据年份和周数获取当前状态和周报数据", notes = "根据年份和周数获取当前状态和周报数据")
+    @GetMapping("/getWeeklyReportByTime/{year}/{week}")
+    public ResultBean<?> getWeeklyReportByTime(@PathVariable int year, @PathVariable int week) {
+        return ResultBean.success(deptReportService.getWeeklyReportByTime(year, week));
+    }
+
     @ApiOperation(value = "部门周报保存为草稿", notes = "部门周报保存为草稿")
     @PostMapping("/saveDraft")
     public ResultBean<?> saveDeptReportDraft(@RequestBody DeptReportVO deptReport) {

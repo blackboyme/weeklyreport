@@ -149,6 +149,27 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
         return personalReportWeekDTO;
     }
 
+    @Override
+    public PersonalReportStatusDTO getWeeklyReportByTime(int year, int week) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        if(!"1".equals(userInfo.getRoleType())||!"2".equals(userInfo.getRoleType())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        PersonalReport personalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), week,year);
+        if(personalReport == null){
+            throw new BusinessException(ResultCode.REPORT_IS_NULL);
+        }
+        FlowRecord flowRecord = flowRecordMapper.selectById(personalReport.getFlowId());
+        if(flowRecord == null){
+            throw new BusinessException(ResultCode.FLOW_IS_NULL);
+        }
+        PersonalReportStatusDTO personalReportStatusDTO = new PersonalReportStatusDTO();
+        BeanUtils.copyProperties(personalReport, personalReportStatusDTO);
+        personalReportStatusDTO.setStatus(flowRecord.getCurrentStatus());
+
+        return personalReportStatusDTO;
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)

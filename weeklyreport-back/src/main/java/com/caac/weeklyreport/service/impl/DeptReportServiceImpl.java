@@ -4,10 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
-import com.caac.weeklyreport.entity.DeptReport;
-import com.caac.weeklyreport.entity.FlowHistory;
-import com.caac.weeklyreport.entity.FlowRecord;
-import com.caac.weeklyreport.entity.UserInfo;
+import com.caac.weeklyreport.entity.*;
+import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
 import com.caac.weeklyreport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.DeptReportMapper;
@@ -22,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -69,7 +68,7 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
 //            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
 //        }
 
-        DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), deptReportVO.getWeek());
+        DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), deptReportVO.getWeek(), LocalDate.now().getYear());
 
         if (existingDraft != null) {
             FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());
@@ -155,6 +154,19 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
     }
 
     @Override
+    public DeptReport getWeeklyReportByTime(int year, int week) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        if(!"3".equals(userInfo.getRoleType())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        DeptReport deptReport = getDeptDraftByUserIdAndWeek(userInfo.getUserId(), week,year);
+        if(deptReport == null){
+            throw new BusinessException(ResultCode.REPORT_IS_NULL);
+        }
+        return deptReport;
+    }
+
+    @Override
     public DeptReport getDeptReportById(String id) {
         return deptReportMapper.selectById(id);
     }
@@ -183,11 +195,12 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
     }
 
     @Override
-    public DeptReport getDeptDraftByUserIdAndWeek(String deptId, int week) {
+    public DeptReport getDeptDraftByUserIdAndWeek(String deptId, int week,int year) {
         QueryWrapper<DeptReport> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("dept_id", deptId)
                 .eq("week", week)
-                .eq("is_deleted", "0");
+                .eq("is_deleted", "0")
+                .apply("YEAR(created_at) = {0}", year);
         return deptReportMapper.selectOne(queryWrapper);
     }
 }

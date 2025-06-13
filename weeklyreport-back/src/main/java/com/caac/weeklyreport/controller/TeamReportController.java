@@ -37,6 +37,12 @@ public class TeamReportController {
         return ResponseEntity.ok(teamReportService.createTeamReport(teamReport));
     }
 
+    @ApiOperation(value = "根据年份和周数获取当前状态和周报数据", notes = "根据年份和周数获取当前状态和周报数据")
+    @GetMapping("/getWeeklyReportByTime/{year}/{week}")
+    public ResultBean<?> getWeeklyReportByTime(@PathVariable int year, @PathVariable int week) {
+        return ResultBean.success(teamReportService.getWeeklyReportByTime(year, week));
+    }
+
     @ApiOperation(value = "团队周报填写-获取当前状态和周报数据", notes = "团队周报填写-获取当前状态和周报数据")
     @GetMapping("/getCurrentStatusAndWeeklyReport")
     public ResultBean<?> getCurrentStatusAndWeeklyReport() {
