@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9080
   servlet:
     context-path: /weeklyreport
 spring:
@@ -34,3 +34,7 @@ token:
   secret-key: YourSecretKey123
   # Token有效期（分钟）- 7天
   validity-minutes: 1080
+
+wechat:
+  appid: wxb92b2b0cb5c17a28
+  secret: 31a9c9c3d2852f6642470c777a5edf8b

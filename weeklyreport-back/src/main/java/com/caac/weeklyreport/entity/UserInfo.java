@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public class UserInfo implements Serializable {
     private String userId; // 用户ID
     private String userName; // 员工名称
+    private String openId; // openId
     private String teamId; // 团队部门ID
     private String phoneNo; // 手机号
     private String roleId = "1"; // 角色ID
@@ -26,10 +27,11 @@ public class UserInfo implements Serializable {
     public UserInfo() {
     }
 
-    public UserInfo(String userId, String userName, String teamId, String phoneNo, String roleId,
+    public UserInfo(String userId, String userName, String openId, String teamId, String phoneNo, String roleId,
                    String roleName, String roleType, String teamName, String departName) {
         this.userId = userId;
         this.userName = userName;
+        this.openId = openId;
         this.teamId = teamId;
         this.phoneNo = phoneNo;
         this.roleId = roleId;
@@ -144,6 +146,15 @@ public class UserInfo implements Serializable {
 
     public void setDepartName(String departName) {
         this.departName = departName;
+    }
+
+
+    public String getOpenId() {
+        return openId;
+    }
+
+    public void setOpenId(String openId) {
+        this.openId = openId;
     }
 
     public String toJsonString() {

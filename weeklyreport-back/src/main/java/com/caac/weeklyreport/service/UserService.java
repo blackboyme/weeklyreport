@@ -12,7 +12,7 @@ public interface UserService extends IService<User> {
     List<User> getAllUsers();
     User updateUser(User user);
     void deleteUser(String id);
-    UserInfo login(String phoneNo);
+    UserInfo login(String phoneNo,String openId);
     UserInfo validateUserByToken(String token);
     String refreshToken(String oldToken);
 }

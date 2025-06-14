@@ -17,6 +17,7 @@ public class User {
     @TableId
     private String userId;          // 用户ID
     private String userName;        // 员工名称
+    private String openId;        // openID
     private String teamId;          // 团队部门ID
     private String phoneNo;         // 手机号
     private String roleId = "1";    // 角色ID

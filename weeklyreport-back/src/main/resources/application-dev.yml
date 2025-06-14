@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/wrdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://47.108.161.131:3306/wrdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: wrusr
-    password: Pass2025!
+    password: Hanrenjie123!
 logging:
   level:
     root: info

@@ -7,6 +7,7 @@ import com.caac.weeklyreport.mapper.UserMapper;
 import com.caac.weeklyreport.service.UserService;
 import com.caac.weeklyreport.util.TokenUtil;
 import com.caac.weeklyreport.entity.UserInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,7 +57,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public UserInfo login(String phoneNo) {
+    public UserInfo login(String phoneNo,String openId) {
         // 使用新的查询方法获取完整的用户信息
         UserInfo userInfo = userMapper.getUserInfoByPhoneNo(phoneNo);
         if (userInfo != null) {
@@ -66,10 +67,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             User user = new User();
             user.setUserId(userInfo.getUserId());
             user.setToken(newToken);
+            if(!StringUtils.isEmpty(openId)){
+                user.setOpenId(openId);
+            }
             userMapper.updateById(user);
             // 设置token到userInfo
             userInfo.setToken(newToken);
-            return userInfo;
+            return userMapper.getUserInfoByPhoneNo(phoneNo);
         }
         return null;
     }

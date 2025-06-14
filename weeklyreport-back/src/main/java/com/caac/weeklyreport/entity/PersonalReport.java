@@ -135,6 +135,12 @@ public class PersonalReport implements Serializable {
     private String nextOthers;
 
     /**
+     * 下周其他工作
+     */
+    @TableField("special")
+    private String special;
+
+    /**
      * 创建时间
      */
     @TableField("created_at")
@@ -307,6 +313,14 @@ public class PersonalReport implements Serializable {
         this.isDeleted = isDeleted;
     }
 
+    public String getSpecial() {
+        return special;
+    }
+
+    public void setSpecial(String special) {
+        this.special = special;
+    }
+
     @Override
     public String toString() {
         return "PersonalReport{" +
@@ -329,6 +343,7 @@ public class PersonalReport implements Serializable {
             ", nextSystem=" + nextSystem +
             ", nextConstruction=" + nextConstruction +
             ", nextOthers=" + nextOthers +
+            ", special=" + special +
             ", createdAt=" + createdAt +
             ", updatedAt=" + updatedAt +
             ", isDeleted=" + isDeleted +

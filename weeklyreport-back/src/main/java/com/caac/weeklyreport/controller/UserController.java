@@ -2,10 +2,12 @@ package com.caac.weeklyreport.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaUserService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import com.caac.weeklyreport.entity.vo.LoginVO;
 import com.caac.weeklyreport.entity.User;
 import com.caac.weeklyreport.entity.UserInfo;
 import com.caac.weeklyreport.entity.dto.PhoneInfo;
 import com.caac.weeklyreport.service.UserService;
+import com.caac.weeklyreport.util.LogBacks;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,8 +77,8 @@ public class UserController {
         if (StringUtils.isEmpty(phoneNo)) {
             return ResponseEntity.badRequest().body("手机号不能为空");
         }
-
-        UserInfo userInfo = userService.login(phoneNo);
+        String openId = "openId";
+        UserInfo userInfo = userService.login(phoneNo,openId);
         if (userInfo != null) {
             return ResponseEntity.ok(userInfo);
         } else {
@@ -86,15 +88,16 @@ public class UserController {
     /*
     * 新登录接口
     * */
-    @PostMapping("/api/loginAndGetPhone")
-    public ResponseEntity<?> getPhoneNumber(@RequestBody Map<String, String> request) throws WxErrorException, JsonProcessingException, JsonMappingException {
-        String encryptedData = request.get("encryptedData");
-        String iv = request.get("iv");
-        String code = request.get("code");
+    @PostMapping("/loginAndGetPhone")
+    public ResponseEntity<?> getPhoneNumber(@RequestBody LoginVO loginVO) throws WxErrorException, JsonProcessingException, JsonMappingException {
+        String encryptedData = loginVO.getEncryptedData();
+        String iv = loginVO.getIv();
+        String code = loginVO.getCode();
 
         WxMaJscode2SessionResult session = wxMaUserService.getSessionInfo(code);
         String key = session.getSessionKey();
-        String openid1 = session.getOpenid();
+        String openid = session.getOpenid();
+        LogBacks.error("openId:",openid);
 
         // 解密encryptedData
         String phoneNumber = decryptPhoneNumber(encryptedData, key, iv);
@@ -106,7 +109,7 @@ public class UserController {
         if (StringUtils.isEmpty(number)) {
             return ResponseEntity.badRequest().body("手机号不能为空");
         }
-        UserInfo userInfo = userService.login(number);
+        UserInfo userInfo = userService.login(number,openid);
         if (userInfo != null) {
             return ResponseEntity.ok(userInfo);
         } else {
