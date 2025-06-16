@@ -166,7 +166,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
         PersonalReportStatusDTO personalReportStatusDTO = new PersonalReportStatusDTO();
         BeanUtils.copyProperties(personalReport, personalReportStatusDTO);
         personalReportStatusDTO.setStatus(flowRecord.getCurrentStatus());
-
+        personalReportStatusDTO.setComment(flowRecord.getComment());
         return personalReportStatusDTO;
     }
 
