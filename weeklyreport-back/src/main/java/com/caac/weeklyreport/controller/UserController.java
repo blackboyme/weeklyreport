@@ -2,10 +2,12 @@ package com.caac.weeklyreport.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaUserService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.vo.LoginVO;
 import com.caac.weeklyreport.entity.User;
 import com.caac.weeklyreport.entity.UserInfo;
 import com.caac.weeklyreport.entity.dto.PhoneInfo;
+import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.service.UserService;
 import com.caac.weeklyreport.util.LogBacks;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -89,24 +91,58 @@ public class UserController {
     * 新登录接口
     * */
     @PostMapping("/loginAndGetPhone")
-    public ResponseEntity<?> getPhoneNumber(@RequestBody LoginVO loginVO) throws WxErrorException, JsonProcessingException, JsonMappingException {
+    public ResponseEntity<?> getPhoneNumber(@RequestBody LoginVO loginVO) {
         String encryptedData = loginVO.getEncryptedData();
         String iv = loginVO.getIv();
         String code = loginVO.getCode();
-
-        WxMaJscode2SessionResult session = wxMaUserService.getSessionInfo(code);
+        LogBacks.error("iv:",iv);
+        LogBacks.error("code:",code);
+        if(StringUtils.isEmpty(iv) && StringUtils.isEmpty(code)) {
+            throw new BusinessException("iv和code为空");
+        }
+        if(StringUtils.isEmpty(iv)) {
+            throw new BusinessException("iv为空");
+        }
+        if(StringUtils.isEmpty(code)) {
+            throw new BusinessException("code为空");
+        }
+        WxMaJscode2SessionResult session = null;
+        try {
+            session = wxMaUserService.getSessionInfo(code);
+        } catch (WxErrorException e) {
+            LogBacks.error("微信获取session失败:"+e.getMessage());
+            throw new BusinessException("微信获取session失败:"+e.getMessage());
+        }
+        if(session == null) {
+            LogBacks.error("微信获取session失败:session为空");
+            throw new BusinessException("微信获取session失败:session为空");
+        }
+        LogBacks.error("session:",session);
         String key = session.getSessionKey();
         String openid = session.getOpenid();
+        if(StringUtils.isAnyBlank(key,openid)) {
+            LogBacks.error("微信调取失败：key或者openId为空");
+            throw new BusinessException("微信调取失败：key或者openId为空");
+        }
         LogBacks.error("openId:",openid);
+
+
 
         // 解密encryptedData
         String phoneNumber = decryptPhoneNumber(encryptedData, key, iv);
         //{"phoneNumber":"18502820522","purePhoneNumber":"18502820522","countryCode":"86","watermark":{"timestamp":1749630283,"appid":"wxb92b2b0cb5c17a28"}}
         ObjectMapper objectMapper = new ObjectMapper();
         // 将JSON字符串转换为PhoneInfo对象
-        PhoneInfo phoneInfo = objectMapper.readValue(phoneNumber, PhoneInfo.class);
+        PhoneInfo phoneInfo = null;
+        try {
+            phoneInfo = objectMapper.readValue(phoneNumber, PhoneInfo.class);
+        } catch (JsonProcessingException e) {
+            LogBacks.error("微信解析参数失败:"+e.getMessage());
+            throw new BusinessException("微信解析参数失败:"+e.getMessage());
+        }
         String number = phoneInfo.getPhoneNumber();
         if (StringUtils.isEmpty(number)) {
+            LogBacks.error("手机号不能为空");
             return ResponseEntity.badRequest().body("手机号不能为空");
         }
         UserInfo userInfo = userService.login(number,openid);

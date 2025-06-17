@@ -12,7 +12,7 @@ public interface UserMapper extends BaseMapper<User> {
     // 不需要在这里定义方法，BaseMapper已经提供了基本的CRUD操作
     
     @Select("SELECT " +
-            "u.user_id, u.user_name, u.team_id, u.phone_no, u.role_id, " +
+            "u.user_id, u.user_name,u.open_id, u.team_id, u.phone_no, u.role_id, u.token, " +
             "u.created_at, u.updated_at, u.is_deleted, " +
             "r.role_name, r.role_type, " +
             "t.team_name, t.depart_name " +
