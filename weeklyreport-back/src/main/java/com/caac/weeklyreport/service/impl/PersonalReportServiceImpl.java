@@ -152,7 +152,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
     @Override
     public PersonalReportStatusDTO getWeeklyReportByTime(int year, int week) {
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!"1".equals(userInfo.getRoleType())||!"2".equals(userInfo.getRoleType())){
+        if(!"1".equals(userInfo.getRoleType())&&!"2".equals(userInfo.getRoleType())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
         PersonalReport personalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), week,year);
