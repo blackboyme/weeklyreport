@@ -39,6 +39,11 @@ public class PersonalReportVO {
     private String others;
 
     /**
+     * 特殊情况说明
+     */
+    private String special;
+
+    /**
      * 下周装备研发
      */
     private String nextEquip;

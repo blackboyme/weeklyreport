@@ -76,7 +76,8 @@ public enum ResultCode {
     FLOW_ACCESS_DENY_PASS(5002,"周报已审核，不可修改！"),
     FLOW_ACCESS_DENY_SUBMIT(5003,"周报审核中，不可修改！"),
     FLOW_ACCESS_DENY_CANCEL(5005,"周报审核中，不可修改！"),
-    FLOW_ACCESS_PASS(5004,"周报已审核通过，请勿重复提交！");
+    FLOW_ACCESS_PASS(5004,"周报已审核通过，请勿重复提交！"),
+    FLOW_LEADER_NULL(5005,"当前用户未设置审批人！");
 
     private int code;
     private String meassage;
