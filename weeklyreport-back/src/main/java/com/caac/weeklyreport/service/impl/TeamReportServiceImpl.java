@@ -433,12 +433,15 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
     }
 
     @Override
-    public TeamReportStatusDTO getWeeklyReportByTime(int year, int week) {
+    public TeamReportStatusDTO getWeeklyReportByTime(int year, int week, String teamId) {
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!"2".equals(userInfo.getRoleType())){
+        if("1".equals(userInfo.getRoleType())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
-        TeamReport teamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), week,year);
+        if("2".equals(userInfo.getRoleType())&&!teamId.equals(userInfo.getTeamId())) {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        TeamReport teamReport = getTeamDraftByUserIdAndWeek(teamId, week,year);
         if(teamReport == null){
             throw new BusinessException(ResultCode.REPORT_IS_NULL);
         }

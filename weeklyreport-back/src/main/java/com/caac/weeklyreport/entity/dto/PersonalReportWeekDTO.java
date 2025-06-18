@@ -13,4 +13,5 @@ public class PersonalReportWeekDTO {
     PersonalReport lastWeekPersonalReport;
     String currentStatus;
     Boolean canOperate;
+    String comment;
 }

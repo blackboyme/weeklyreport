@@ -127,6 +127,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             }
             personalReportWeekDTO.setCurrentStatus(flowRecord.getCurrentStatus());
             personalReportWeekDTO.setCurrentWeekPersonalReport(currentPersonalReport);
+            personalReportWeekDTO.setComment(flowRecord.getComment());
         }
 
         // 当前状态为：已提交、已通过审批、已被拒绝，都不能修改

@@ -29,7 +29,7 @@ public interface ITeamReportService extends IService<TeamReport> {
     TeamReport getTeamDraftByUserIdAndWeek(String userId, int week,int year);
     TeamReport submitTeamReport(TeamReportVO teamReport);
     TeamReportWeekDTO getCurrentStatusAndWeeklyReport();
-    TeamReportStatusDTO getWeeklyReportByTime(int year, int week);
+    TeamReportStatusDTO getWeeklyReportByTime(int year, int week, String teamId);
     Boolean passTeamReport(PassVO passVO);
     Boolean cancelTeamReport(CancelVO cancelVO);
 

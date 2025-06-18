@@ -64,7 +64,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 生成新的token
             String newToken = TokenUtil.generateToken(userInfo);
             // 更新用户token
-            User user = new User();
+            User user = userMapper.selectById(userInfo.getUserId());
             user.setUserId(userInfo.getUserId());
             user.setToken(newToken);
             if(!StringUtils.isEmpty(openId)){
