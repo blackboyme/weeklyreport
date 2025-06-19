@@ -17,6 +17,7 @@ import com.caac.weeklyreport.service.ITeamReportService;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
 import com.caac.weeklyreport.util.UserContext;
 import com.caac.weeklyreport.util.WeekDateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,6 +68,10 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
         if(!userInfo.getTeamId().equals(teamReportVO.getTeamId())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+
+        if(!userInfo.getUserId().equals(teamReportVO.getUserId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
@@ -162,6 +168,11 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
+        if(!userInfo.getUserId().equals(teamReportVO.getUserId())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+
+
         User approver = getApprover(userInfo);
 
         TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReportVO.getTeamId(), teamReportVO.getWeek(),LocalDate.now().getYear());
@@ -252,6 +263,24 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
 
             return getTeamReportById(trId);
         }
+    }
+
+    @Override
+    public List<TeamReportStatusDTO> getAllTeamReportByStatus(String status) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        User approver = getApprover(userInfo);
+        if(!approver.getUserId().equals(userInfo.getUserId())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        List<TeamReportStatusDTO> teamReports = null;
+        if(StringUtils.isEmpty(status)){
+            teamReports = teamReportMapper.getAllTeamReportWithStatus(userInfo.getTeamId(),
+                    WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear());
+        } else {
+            teamReports = teamReportMapper.getTeamReportByStatus(userInfo.getTeamId(),
+                    WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),status);
+        }
+        return teamReports;
     }
 
     @Override
@@ -369,7 +398,6 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
         // 封装拼接数据
         List<PersonalReportStatusDTO>  personalReports = personalReportMapper.getPersonalReportByStatus(userInfo.getTeamId(),
                     WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),"3");
-        currentTeamReport = new TeamReport();
         StringBuilder equip =  new StringBuilder();
         StringBuilder systemRd = new StringBuilder();
         StringBuilder construction = new StringBuilder();
@@ -379,46 +407,35 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
         StringBuilder nextConstruction = new StringBuilder();
         StringBuilder nextOthers = new StringBuilder();
 
-        for (int i = 0; i < personalReports.size(); i++) {
-            if(personalReports.size() > 1 && i != personalReports.size() - 1 && i != 0){
-                equip.append(personalReports.get(i).getEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                systemRd.append(personalReports.get(i).getSystemRd()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                construction.append(personalReports.get(i).getConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                others.append(personalReports.get(i).getOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                nextEquip.append(personalReports.get(i).getNextEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                nextSystem.append(personalReports.get(i).getNextSystem()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                nextConstruction.append(personalReports.get(i).getNextConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                nextOthers.append(personalReports.get(i).getNextOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-            } else if(i == 0) {
-                equip.append(personalReports.get(i).getEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                systemRd.append(personalReports.get(i).getSystemRd()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                construction.append(personalReports.get(i).getConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                others.append(personalReports.get(i).getOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                nextEquip.append(personalReports.get(i).getNextEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                nextSystem.append(personalReports.get(i).getNextSystem()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                nextConstruction.append(personalReports.get(i).getNextConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-                nextOthers.append(personalReports.get(i).getNextOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")").append("/n");
-            } else {
-                equip.append(personalReports.get(i).getEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")");
-                systemRd.append(personalReports.get(i).getSystemRd()).append(" ").append("("+personalReports.get(i).getUserName()+")");
-                construction.append(personalReports.get(i).getConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")");
-                others.append(personalReports.get(i).getOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")");
-                nextEquip.append(personalReports.get(i).getNextEquip()).append(" ").append("("+personalReports.get(i).getUserName()+")");
-                nextSystem.append(personalReports.get(i).getNextSystem()).append(" ").append("("+personalReports.get(i).getUserName()+")");
-                nextConstruction.append(personalReports.get(i).getNextConstruction()).append(" ").append("("+personalReports.get(i).getUserName()+")");
-                nextOthers.append(personalReports.get(i).getNextOthers()).append(" ").append("("+personalReports.get(i).getUserName()+")");
+        if(!personalReports.isEmpty()) {
+            for (int i = 0; i < personalReports.size(); i++) {
+                PersonalReport report = personalReports.get(i);
+                String userNamePart = " (" + report.getUserName() + ")";
+                boolean isLast = (personalReports.size() == 1 || i == personalReports.size() - 1);
+                String separator = isLast ? "" : System.lineSeparator();
+
+                appendIfNotEmpty(equip, report.getEquip(), userNamePart, separator);
+                appendIfNotEmpty(systemRd, report.getSystemRd(), userNamePart, separator);
+                appendIfNotEmpty(construction, report.getConstruction(), userNamePart, separator);
+                appendIfNotEmpty(others, report.getOthers(), userNamePart, separator);
+                appendIfNotEmpty(nextEquip, report.getNextEquip(), userNamePart, separator);
+                appendIfNotEmpty(nextSystem, report.getNextSystem(), userNamePart, separator);
+                appendIfNotEmpty(nextConstruction, report.getNextConstruction(), userNamePart, separator);
+                appendIfNotEmpty(nextOthers, report.getNextOthers(), userNamePart, separator);
             }
+
+            TeamReport lastWeekTeamReport = new TeamReport();
+            lastWeekTeamReport.setEquip(equip.toString());
+            lastWeekTeamReport.setSystemRd(systemRd.toString());
+            lastWeekTeamReport.setConstruction(construction.toString());
+            lastWeekTeamReport.setOthers(others.toString());
+            lastWeekTeamReport.setNextEquip(nextEquip.toString());
+            lastWeekTeamReport.setNextSystem(nextSystem.toString());
+            lastWeekTeamReport.setNextConstruction(nextConstruction.toString());
+            lastWeekTeamReport.setNextOthers(nextOthers.toString());
+            teamReportWeekDTO.setLastWeekTeamReport(lastWeekTeamReport);
         }
-        TeamReport lastWeekTeamReport = new TeamReport();
-        lastWeekTeamReport.setEquip(equip.toString());
-        lastWeekTeamReport.setSystemRd(systemRd.toString());
-        lastWeekTeamReport.setConstruction(construction.toString());
-        lastWeekTeamReport.setOthers(others.toString());
-        lastWeekTeamReport.setNextEquip(nextEquip.toString());
-        lastWeekTeamReport.setNextSystem(nextSystem.toString());
-        lastWeekTeamReport.setNextConstruction(nextConstruction.toString());
-        lastWeekTeamReport.setNextOthers(nextOthers.toString());
-        teamReportWeekDTO.setLastWeekTeamReport(lastWeekTeamReport);
+
 
 //        TeamReport lastWeekTeamReport = null;
 //        if (currentWeek == 1) {
@@ -430,6 +447,13 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
 //        teamReportWeekDTO.setLastWeekTeamReport(lastWeekTeamReport);
 
         return teamReportWeekDTO;
+    }
+
+    // 辅助方法
+    private void appendIfNotEmpty(StringBuilder builder, String value, String suffix, String separator) {
+        if (value != null && !value.trim().isEmpty()) {
+            builder.append(value).append(suffix).append(separator);
+        }
     }
 
     @Override
@@ -504,8 +528,8 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
     }
 
     public User getApprover(UserInfo userInfo) {
-        if("1".equals(userInfo.getRoleType())||"2".equals(userInfo.getRoleType())){
-            return userMapper.getTeamApprover(userInfo.getTeamId(),"2");
+        if(!"1".equals(userInfo.getRoleType())){
+            return userMapper.getDeptApprover("3");
         } else {
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }

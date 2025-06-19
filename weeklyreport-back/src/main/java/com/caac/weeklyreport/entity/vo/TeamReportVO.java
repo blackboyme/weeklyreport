@@ -9,6 +9,11 @@ public class TeamReportVO {
     private String teamId;
 
     /**
+     * userId
+     */
+    private String userId;
+
+    /**
      * 周数
      */
     private Integer week;

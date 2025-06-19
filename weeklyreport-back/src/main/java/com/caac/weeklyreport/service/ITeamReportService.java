@@ -28,6 +28,7 @@ public interface ITeamReportService extends IService<TeamReport> {
     TeamReport saveTeamReportDraft(TeamReportVO teamReportVO);
     TeamReport getTeamDraftByUserIdAndWeek(String userId, int week,int year);
     TeamReport submitTeamReport(TeamReportVO teamReport);
+    List<TeamReportStatusDTO> getAllTeamReportByStatus(String status);
     TeamReportWeekDTO getCurrentStatusAndWeeklyReport();
     TeamReportStatusDTO getWeeklyReportByTime(int year, int week, String teamId);
     Boolean passTeamReport(PassVO passVO);

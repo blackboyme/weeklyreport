@@ -34,6 +34,7 @@ public class DeptReport implements Serializable {
     private String drId;
 
     @ApiModelProperty(value = "流程ID")
+    @TableField("flow_id")
     private String flowId;
 
     @ApiModelProperty(value = "员工ID")

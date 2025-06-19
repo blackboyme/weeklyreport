@@ -46,6 +46,7 @@ public interface PersonalReportMapper extends BaseMapper<PersonalReport> {
             "u.user_id = pr.user_id " +
             "WHERE " +
             "YEAR(pr.created_at) = #{year} " +
+            "AND fr.current_status != '1'" +
             "AND pr.week = #{week} " +
             "AND pr.team_id = #{teamId} " +
             "ORDER BY pr.updated_at")

@@ -3,8 +3,11 @@ package com.caac.weeklyreport.controller;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.TeamReport;
+import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
+import com.caac.weeklyreport.entity.dto.TeamReportStatusDTO;
 import com.caac.weeklyreport.entity.vo.CancelVO;
 import com.caac.weeklyreport.entity.vo.PassVO;
+import com.caac.weeklyreport.entity.vo.StatusVO;
 import com.caac.weeklyreport.entity.vo.TeamReportVO;
 import com.caac.weeklyreport.service.ITeamReportService;
 import io.swagger.annotations.ApiOperation;
@@ -49,6 +52,12 @@ public class TeamReportController {
         return ResultBean.success(teamReportService.getCurrentStatusAndWeeklyReport());
     }
 
+    @ApiOperation(value = "根据状态团队领导查询所有团队成员周报", notes = "根据状态团队领导查询所有团队成员周报")
+    @PostMapping("/approveList")
+    public ResultBean<?> getAllTeamReportByStatus(@RequestBody StatusVO statusVO) {
+        List<TeamReportStatusDTO> allPersonalReportsForWeek = teamReportService.getAllTeamReportByStatus(statusVO.getStatus());
+        return ResultBean.success(allPersonalReportsForWeek);
+    }
 
     @ApiOperation(value = "团队周报保存为草稿", notes = "团队周报保存为草稿")
     @PostMapping("/saveDraft")
