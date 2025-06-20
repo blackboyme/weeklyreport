@@ -24,6 +24,7 @@ public interface IDeptReportService extends IService<DeptReport> {
     DeptReport updateDeptReport(DeptReport deptReport);
     void deleteDeptReport(String id);
     DeptReport saveDeptReportDraft(DeptReportVO deptReport);
+    DeptReport saveAndSubmit(DeptReportVO deptReport);
     DeptReport getWeeklyReportByTime(int year, int week);
     DeptReportWeekDTO getCurrentStatusAndDeptReport();
     DeptReport getDeptDraftByUserIdAndWeek(String userId, int week,int year);
