@@ -5,7 +5,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
+import com.caac.weeklyreport.entity.dto.DeptReportWeekDTO;
 import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
+import com.caac.weeklyreport.entity.dto.TeamReportStatusDTO;
+import com.caac.weeklyreport.entity.dto.TeamReportWeekDTO;
 import com.caac.weeklyreport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.DeptReportMapper;
@@ -152,6 +155,93 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             return deptReport;
         }
     }
+    @Override
+    public DeptReportWeekDTO getCurrentStatusAndDeptReport() {
+        DeptReportWeekDTO deptReportWeekDTO = new DeptReportWeekDTO();
+        UserInfo userInfo = UserContext.getCurrentUser();
+        int currentWeek =  WeekDateUtils.getCurrentWeekNumber();
+        DeptReport currentDeptReport = getDeptDraftByUserIdAndWeek(userInfo.getDeptId(), currentWeek, LocalDate.now().getYear());
+        // 没有暂存团队周报
+        if(currentDeptReport == null){
+            deptReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
+            deptReportWeekDTO.setCurrentWeekDeptReport(currentDeptReport);
+        } else {// 有暂存或以提交的团队周报
+            FlowRecord flowRecord = flowRecordMapper.selectById(currentDeptReport.getFlowId());
+            if(flowRecord == null){
+                throw new BusinessException(ResultCode.FLOW_IS_NULL);
+            }
+            deptReportWeekDTO.setCurrentStatus(flowRecord.getCurrentStatus());
+            deptReportWeekDTO.setCurrentWeekDeptReport(currentDeptReport);
+        }
+
+        // 当前状态为已通过审批、已提交，前端不允许用户打开
+        if (CommonConstants.CURRENT_STATUS_PASS.equals(deptReportWeekDTO.getCurrentStatus())
+                || CommonConstants.CURRENT_STATUS_SUBMIT.equals(deptReportWeekDTO.getCurrentStatus())) {
+            deptReportWeekDTO.setCanOperate(Boolean.FALSE);
+        } else {
+            deptReportWeekDTO.setCanOperate(Boolean.TRUE);
+        }
+        // 封装拼接数据
+        List<TeamReportStatusDTO>  teamReports = deptReportMapper.getTeamReportByStatus(userInfo.getDeptId(),
+                WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),"3");
+        StringBuilder equip =  new StringBuilder();
+        StringBuilder systemRd = new StringBuilder();
+        StringBuilder construction = new StringBuilder();
+        StringBuilder others = new StringBuilder();
+        StringBuilder nextEquip = new StringBuilder();
+        StringBuilder nextSystem = new StringBuilder();
+        StringBuilder nextConstruction = new StringBuilder();
+        StringBuilder nextOthers = new StringBuilder();
+
+        if(!teamReports.isEmpty()) {
+            for (int i = 0; i < teamReports.size(); i++) {
+                TeamReport report = teamReports.get(i);
+                String userNamePart = " (" + report.getUserName() + ")";
+                boolean isLast = (teamReports.size() == 1 || i == teamReports.size() - 1);
+                String separator = isLast ? "" : System.lineSeparator();
+
+                appendIfNotEmpty(equip, report.getEquip(), userNamePart, separator);
+                appendIfNotEmpty(systemRd, report.getSystemRd(), userNamePart, separator);
+                appendIfNotEmpty(construction, report.getConstruction(), userNamePart, separator);
+                appendIfNotEmpty(others, report.getOthers(), userNamePart, separator);
+                appendIfNotEmpty(nextEquip, report.getNextEquip(), userNamePart, separator);
+                appendIfNotEmpty(nextSystem, report.getNextSystem(), userNamePart, separator);
+                appendIfNotEmpty(nextConstruction, report.getNextConstruction(), userNamePart, separator);
+                appendIfNotEmpty(nextOthers, report.getNextOthers(), userNamePart, separator);
+            }
+
+            DeptReport lastWeekDeptReport = new DeptReport();
+            lastWeekDeptReport.setEquip(equip.toString());
+            lastWeekDeptReport.setSystemRd(systemRd.toString());
+            lastWeekDeptReport.setConstruction(construction.toString());
+            lastWeekDeptReport.setOthers(others.toString());
+            lastWeekDeptReport.setNextEquip(nextEquip.toString());
+            lastWeekDeptReport.setNextSystem(nextSystem.toString());
+            lastWeekDeptReport.setNextConstruction(nextConstruction.toString());
+            lastWeekDeptReport.setNextOthers(nextOthers.toString());
+            deptReportWeekDTO.setLastWeekDeptReport(lastWeekDeptReport);
+        }
+
+
+//        TeamReport lastWeekTeamReport = null;
+//        if (currentWeek == 1) {
+//            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(LocalDate.now().getYear()-1);
+//            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), lastYearTotalWeek, LocalDate.now().getYear()-1);
+//        } else {
+//            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek-1, LocalDate.now().getYear());
+//        }
+//        teamReportWeekDTO.setLastWeekTeamReport(lastWeekTeamReport);
+
+        return deptReportWeekDTO;
+    }
+
+    // 辅助方法
+    private void appendIfNotEmpty(StringBuilder builder, String value, String suffix, String separator) {
+        if (value != null && !value.trim().isEmpty()) {
+            builder.append(value).append(suffix).append(separator);
+        }
+    }
+
 
     @Override
     public DeptReport getWeeklyReportByTime(int year, int week) {

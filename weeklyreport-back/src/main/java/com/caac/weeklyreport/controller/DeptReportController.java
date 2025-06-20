@@ -41,6 +41,12 @@ public class DeptReportController {
         return ResultBean.success(deptReportService.getWeeklyReportByTime(year, week));
     }
 
+    @ApiOperation(value = "部门周报填写-获取当前状态和周报数据", notes = "部门周报填写-获取当前状态和周报数据")
+    @GetMapping("/getCurrentStatusAndWeeklyReport")
+    public ResultBean<?> getCurrentStatusAndWeeklyReport() {
+        return ResultBean.success(deptReportService.getCurrentStatusAndDeptReport());
+    }
+
     @ApiOperation(value = "部门周报保存为草稿", notes = "部门周报保存为草稿")
     @PostMapping("/saveDraft")
     public ResultBean<?> saveDeptReportDraft(@RequestBody DeptReportVO deptReport) {
