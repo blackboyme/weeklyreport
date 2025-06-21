@@ -19,6 +19,7 @@ public class User {
     private String userName;        // 员工名称
     private String openId;        // openID
     private String teamId;          // 团队部门ID
+    private String deptId;          //部门ID
     private String phoneNo;         // 手机号
     private String roleId = "1";    // 角色ID
     private String token;           // token

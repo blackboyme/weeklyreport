@@ -114,11 +114,13 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             BeanUtils.copyProperties(deptReportVO, deptReport);
             // 创建新草稿
             deptReport.setDrId(drId);
+            deptReport.setUserId(userInfo.getUserId());
             deptReport.setFlowId(flowId);
             deptReport.setUserName(userInfo.getUserName());
             deptReport.setTeamId(userInfo.getTeamId());
             deptReport.setTeamName(userInfo.getTeamName());
-            deptReport.setDeptName(userInfo.getDepartName());
+            deptReport.setDeptId(userInfo.getDeptId());
+            deptReport.setDeptName(userInfo.getDeptName());
             deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(deptReport.getWeek()));
             deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(deptReport.getWeek()));
             deptReport.setCreatedAt(LocalDateTime.now());

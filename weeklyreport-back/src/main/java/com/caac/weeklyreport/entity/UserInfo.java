@@ -19,7 +19,7 @@ public class UserInfo implements Serializable {
     private String roleName; // 角色名称
     private String roleType; // 角色类型
     private String teamName; // 团队名称
-    private String departName;
+    private String deptName;
     private String deptId;// 部门名称
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
@@ -29,7 +29,7 @@ public class UserInfo implements Serializable {
     }
 
     public UserInfo(String userId, String userName, String openId, String teamId, String phoneNo, String roleId,
-                   String roleName, String roleType, String teamName, String departName, String deptId) {
+                   String roleName, String roleType, String teamName, String deptName, String deptId) {
         this.userId = userId;
         this.userName = userName;
         this.openId = openId;
@@ -39,7 +39,7 @@ public class UserInfo implements Serializable {
         this.roleName = roleName;
         this.roleType = roleType;
         this.teamName = teamName;
-        this.departName = departName;
+        this.deptName = deptName;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.deptId = deptId;
@@ -150,12 +150,12 @@ public class UserInfo implements Serializable {
         this.teamName = teamName;
     }
 
-    public String getDepartName() {
-        return departName;
+    public String getDeptName() {
+        return deptName;
     }
 
-    public void setDepartName(String departName) {
-        this.departName = departName;
+    public void setDeptName(String deptName) {
+        this.deptName = deptName;
     }
 
 

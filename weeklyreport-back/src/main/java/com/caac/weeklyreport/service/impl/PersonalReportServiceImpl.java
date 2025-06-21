@@ -330,7 +330,8 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             personalReport.setUserName(userInfo.getUserName());
             personalReport.setTeamId(userInfo.getTeamId());
             personalReport.setTeamName(userInfo.getTeamName());
-            personalReport.setDeptName(userInfo.getDepartName());
+            personalReport.setDeptId(userInfo.getDeptId());
+            personalReport.setDeptName(userInfo.getDeptName());
             personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
             personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
             personalReport.setCreatedAt(LocalDateTime.now());
@@ -430,7 +431,8 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             personalReport.setUserName(userInfo.getUserName());
             personalReport.setTeamId(userInfo.getTeamId());
             personalReport.setTeamName(userInfo.getTeamName());
-            personalReport.setDeptName(userInfo.getDepartName());
+            personalReport.setDeptId(userInfo.getDeptId());
+            personalReport.setDeptName(userInfo.getDeptName());
             personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
             personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
             personalReport.setCreatedAt(LocalDateTime.now());

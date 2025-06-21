@@ -15,10 +15,11 @@ public interface UserMapper extends BaseMapper<User> {
             "u.user_id, u.user_name,u.open_id, u.team_id, u.phone_no, u.role_id, u.token, " +
             "u.created_at, u.updated_at, u.is_deleted, " +
             "r.role_name, r.role_type, " +
-            "t.team_name, t.depart_name " +
+            "t.team_name,d.dept_id,d.dept_name " +
             "FROM user u " +
             "LEFT JOIN role r ON u.role_id = r.role_id " +
             "LEFT JOIN team t ON u.team_id = t.team_id " +
+            "LEFT JOIN dept d ON u.dept_id = d.dept_id " +
             "WHERE u.phone_no = #{phoneNo} AND u.is_deleted = '0'")
     UserInfo getUserInfoByPhoneNo(@Param("phoneNo")String phoneNo);
 

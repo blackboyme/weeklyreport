@@ -122,7 +122,8 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             teamReport.setUserName(userInfo.getUserName());
             teamReport.setTeamId(userInfo.getTeamId());
             teamReport.setTeamName(userInfo.getTeamName());
-            teamReport.setDeptName(userInfo.getDepartName());
+            teamReport.setDeptId(userInfo.getDeptId());
+            teamReport.setDeptName(userInfo.getDeptName());
             teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(teamReport.getWeek()));
             teamReport.setEndDate(WeekDateUtils.getEndDateOfWeek(teamReport.getWeek()));
             teamReport.setCreatedAt(LocalDateTime.now());
@@ -225,7 +226,8 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             teamReport.setUserName(userInfo.getUserName());
             teamReport.setTeamId(userInfo.getTeamId());
             teamReport.setTeamName(userInfo.getTeamName());
-            teamReport.setDeptName(userInfo.getDepartName());
+            teamReport.setDeptId(userInfo.getDeptId());
+            teamReport.setDeptName(userInfo.getDeptName());
             teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(teamReport.getWeek()));
             teamReport.setEndDate(WeekDateUtils.getEndDateOfWeek(teamReport.getWeek()));
             teamReport.setCreatedAt(LocalDateTime.now());
@@ -274,10 +276,10 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
         }
         List<TeamReportStatusDTO> teamReports = null;
         if(StringUtils.isEmpty(status)){
-            teamReports = teamReportMapper.getAllTeamReportWithStatus(userInfo.getTeamId(),
+            teamReports = teamReportMapper.getAllTeamReportWithStatus(userInfo.getDeptId(),
                     WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear());
         } else {
-            teamReports = teamReportMapper.getTeamReportByStatus(userInfo.getTeamId(),
+            teamReports = teamReportMapper.getTeamReportByStatus(userInfo.getDeptId(),
                     WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),status);
         }
         return teamReports;
@@ -287,7 +289,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
     @Transactional(rollbackFor = Exception.class)
     public Boolean passTeamReport(PassVO passVO) {
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!userInfo.getRoleType().equals("2")) {
+        if(!userInfo.getRoleType().equals("3")) {
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
         TeamReport teamReport = teamReportMapper.selectById(passVO.getTrId());
@@ -329,7 +331,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
     @Override
     public Boolean cancelTeamReport(CancelVO cancelVO) {
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!userInfo.getRoleType().equals("2")) {
+        if(!userInfo.getRoleType().equals("3")) {
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
         TeamReport teamReport = teamReportMapper.selectById(cancelVO.getTrId());
@@ -386,6 +388,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             }
             teamReportWeekDTO.setCurrentStatus(flowRecord.getCurrentStatus());
             teamReportWeekDTO.setCurrentWeekTeamReport(currentTeamReport);
+            teamReportWeekDTO.setComment(flowRecord.getComment());
         }
 
         // 当前状态为已通过审批、已提交，前端不允许用户打开
@@ -529,6 +532,9 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
 
     public User getApprover(UserInfo userInfo) {
         if(!"1".equals(userInfo.getRoleType())){
+            if(userMapper.getDeptApprover("3") == null) {
+                throw new BusinessException(ResultCode.FLOW_LEADER_NULL);
+            }
             return userMapper.getDeptApprover("3");
         } else {
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);

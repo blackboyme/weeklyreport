@@ -31,10 +31,10 @@ public interface TeamReportMapper extends BaseMapper<TeamReport> {
             "WHERE " +
             "YEAR(tr.created_at) = #{year} " +
             "AND tr.week = #{week} " +
-            "AND tr.team_id = #{teamId} " +
+            "AND tr.dept_id = #{deptId} " +
             "AND fr.current_status = #{status}" +
             "ORDER BY tr.updated_at")
-    List<TeamReportStatusDTO> getTeamReportByStatus(@Param("teamId")String teamId, @Param("week")int week,
+    List<TeamReportStatusDTO> getTeamReportByStatus(@Param("deptId")String deptId, @Param("week")int week,
                                                         @Param("year")int year, @Param("status")String status);
 
 
@@ -49,9 +49,9 @@ public interface TeamReportMapper extends BaseMapper<TeamReport> {
             "YEAR(tr.created_at) = #{year} " +
             "AND fr.current_status != '1'" +
             "AND tr.week = #{week} " +
-            "AND tr.team_id = #{teamId} " +
+            "AND tr.dept_id = #{deptId} " +
             "ORDER BY tr.updated_at")
-    List<TeamReportStatusDTO> getAllTeamReportWithStatus(@Param("teamId")String teamId, @Param("week")int week,
+    List<TeamReportStatusDTO> getAllTeamReportWithStatus(@Param("deptId")String deptId, @Param("week")int week,
                                                                  @Param("year")int year);
 
 }
