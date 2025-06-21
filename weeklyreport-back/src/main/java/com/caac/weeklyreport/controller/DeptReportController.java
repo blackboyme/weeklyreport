@@ -56,6 +56,15 @@ public class DeptReportController {
         return ResultBean.success(deptReportService.saveDeptReportDraft(deptReport));
     }
 
+    @ApiOperation(value = "部门周报保存为草稿", notes = "部门周报保存为草稿")
+    @PostMapping("/submit")
+    public ResultBean<?> saveDeptReport(@RequestBody DeptReportVO deptReport) {
+        if (StringUtils.isEmpty(deptReport.getDeptId()) || deptReport.getWeek() == null) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(deptReportService.saveDeptReport(deptReport));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<DeptReport> getDeptReport(@PathVariable String id) {
         DeptReport deptReport = deptReportService.getDeptReportById(id);

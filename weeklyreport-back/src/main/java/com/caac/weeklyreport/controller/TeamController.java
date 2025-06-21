@@ -23,7 +23,7 @@ import java.util.List;
  * @since 2025-06-22
  */
 @RestController
-@RequestMapping("/team")
+@RequestMapping("/api/v1/team")
 public class TeamController {
 
     private final ITeamService teamServiceImpl;

@@ -157,6 +157,106 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             return deptReport;
         }
     }
+
+    @Override
+    @Transactional
+    public DeptReport saveDeptReport(DeptReportVO deptReportVO) {
+        // 不能修改其他人的周报
+        UserInfo userInfo = UserContext.getCurrentUser();
+
+        if(!userInfo.getDeptId().equals(deptReportVO.getDeptId())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+
+        DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), deptReportVO.getWeek(), LocalDate.now().getYear());
+
+        if (existingDraft != null) {
+            FlowRecord flowRecord = flowRecordMapper.selectById(existingDraft.getFlowId());
+            if (flowRecord == null) {
+                throw new BusinessException(ResultCode.FLOW_IS_NULL);
+            }
+
+            // 当前状态为已通过审批，不能修改
+//            if (CommonConstants.CURRENT_STATUS_PASS.equals(flowRecord.getCurrentStatus())) {
+//                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_PASS);
+//            } else if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(flowRecord.getCurrentStatus())) {
+//                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_SUBMIT);
+//            }
+
+            BeanUtils.copyProperties(deptReportVO, existingDraft);
+            existingDraft.setUpdatedAt(LocalDateTime.now());
+            deptReportMapper.updateById(existingDraft);
+            flowRecord.setCurrentStage(CommonConstants.CURRENT_STATUS_PASS);
+            flowRecordMapper.updateById(flowRecord);
+
+            //创建新历史记录
+            FlowHistory flowHistory = new FlowHistory();
+            flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setFlowId(existingDraft.getFlowId());
+            flowHistory.setReportId(existingDraft.getDrId());
+            flowHistory.setReportType(CommonConstants.REPORT_TYPE_DEPT);//1-个人周报,2-团队周报,3-部门周报
+            flowHistory.setOperation(CommonConstants.OPERATION_PASS);//1-保存为草稿,2-提交,3-通过,4-退回
+            flowHistory.setOperatorId(userInfo.getUserId());
+            flowHistory.setOperatorName(userInfo.getUserName());
+            flowHistory.setOperatorRole(userInfo.getRoleId());
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_DEPT);
+            flowHistory.setIsDeleted("0");
+
+            flowHistoryMapper.insert(flowHistory);
+
+            return getDeptReportById(existingDraft.getDrId());
+        } else {
+            String flowId = KeyGeneratorUtil.generateUUID();
+            String drId = KeyGeneratorUtil.generateUUID();
+
+            DeptReport deptReport = new DeptReport();
+            BeanUtils.copyProperties(deptReportVO, deptReport);
+            // 创建新草稿
+            deptReport.setDrId(drId);
+            deptReport.setUserId(userInfo.getUserId());
+            deptReport.setFlowId(flowId);
+            deptReport.setUserName(userInfo.getUserName());
+//            deptReport.setTeamId(userInfo.getTeamId());
+//            deptReport.setTeamName(userInfo.getTeamName());
+            deptReport.setDeptId(userInfo.getDeptId());
+            deptReport.setDeptName(userInfo.getDeptName());
+            deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(deptReport.getWeek()));
+            deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(deptReport.getWeek()));
+            deptReport.setCreatedAt(LocalDateTime.now());
+            deptReport.setUpdatedAt(LocalDateTime.now());
+            deptReport.setIsDeleted("0");
+            deptReportMapper.insert(deptReport);
+
+            //创建新流程
+            FlowRecord flowRecord = new FlowRecord();
+            flowRecord.setFlowId(flowId);
+            flowRecord.setReportId(drId);
+            flowRecord.setReportType(CommonConstants.REPORT_TYPE_DEPT); //1-个人周报,2-团队周报,3-部门周报
+            flowRecord.setCurrentStatus(CommonConstants.CURRENT_STATUS_PASS); //1-草稿，2-待审核，3.-已审核，4-已退回
+            flowRecord.setCurrentStage(CommonConstants.CURRENT_STAGE_DEPT); //1-员工提交,2-团队审核,3-部门审核
+            flowRecord.setSubmitterId(userInfo.getUserId());
+            flowRecord.setSubmitterName(userInfo.getUserName());
+            flowRecord.setIsDeleted("0");
+            flowRecordMapper.insert(flowRecord);
+
+            //创建新历史记录
+            FlowHistory flowHistory = new FlowHistory();
+            flowHistory.setHistoryId(KeyGeneratorUtil.generateUUID());
+            flowHistory.setFlowId(flowId);
+            flowHistory.setReportId(drId);
+            flowHistory.setReportType(CommonConstants.REPORT_TYPE_DEPT);//1-个人周报,2-团队周报,3-部门周报
+            flowHistory.setOperation(CommonConstants.OPERATION_PASS);//1-保存为草稿,2-提交,3-通过,4-退回
+            flowHistory.setOperatorId(userInfo.getUserId());
+            flowHistory.setOperatorName(userInfo.getUserName());
+            flowHistory.setOperatorRole(userInfo.getRoleId());
+            flowHistory.setCurrentStage(CommonConstants.CURRENT_STAGE_DEPT);
+            flowHistory.setIsDeleted("0");
+            flowHistoryMapper.insert(flowHistory);
+
+            return deptReport;
+        }
+    }
+
     @Override
     public DeptReportWeekDTO getCurrentStatusAndDeptReport() {
         DeptReportWeekDTO deptReportWeekDTO = new DeptReportWeekDTO();
