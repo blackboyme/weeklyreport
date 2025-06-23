@@ -14,4 +14,5 @@ public class TeamReportWeekDTO {
     TeamReport lastWeekTeamReport;
     String currentStatus;
     Boolean canOperate;
+    String comment;
 }

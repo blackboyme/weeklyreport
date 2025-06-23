@@ -60,7 +60,7 @@ public class WeekDateUtils {
     public static int getCurrentWeekNumber() {
         LocalDate today = LocalDate.now();
         WeekFields weekFields = WeekFields.of(Locale.getDefault());
-        return today.get(weekFields.weekOfYear());
+        return today.get(weekFields.ISO.weekOfYear());
     }
 
     /**
@@ -73,10 +73,10 @@ public class WeekDateUtils {
         WeekFields weekFields = WeekFields.ISO;
 
         // 处理12月31日可能属于下一年第一周的情况
-        int weekNumber = date.get(weekFields.weekOfWeekBasedYear());
+        int weekNumber = date.get(weekFields.ISO.weekOfWeekBasedYear());
         if (weekNumber == 1) {
             date = date.minusWeeks(1);
-            weekNumber = date.get(weekFields.weekOfWeekBasedYear());
+            weekNumber = date.get(weekFields.ISO.weekOfWeekBasedYear());
         }
 
         return weekNumber;

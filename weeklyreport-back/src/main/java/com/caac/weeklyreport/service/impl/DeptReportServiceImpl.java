@@ -66,9 +66,10 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
     public DeptReport saveDeptReportDraft(DeptReportVO deptReportVO) {
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
-        if(!userInfo.getDeptId().equals(deptReportVO.getDeptId())){
-            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
-        }
+        //userInfo中缺少部门ID deptId
+//        if(!userInfo.get().equals(deptReportVO.getDeptId())){
+//            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+//        }
 
         DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), deptReportVO.getWeek(), LocalDate.now().getYear());
 
@@ -113,11 +114,13 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             BeanUtils.copyProperties(deptReportVO, deptReport);
             // 创建新草稿
             deptReport.setDrId(drId);
+            deptReport.setUserId(userInfo.getUserId());
             deptReport.setFlowId(flowId);
             deptReport.setUserName(userInfo.getUserName());
-            //deptReport.setTeamId(userInfo.getTeamId());
-            //deptReport.setTeamName(userInfo.getTeamName());
-            deptReport.setDeptName(userInfo.getDepartName());
+            deptReport.setTeamId(userInfo.getTeamId());
+            deptReport.setTeamName(userInfo.getTeamName());
+            deptReport.setDeptId(userInfo.getDeptId());
+            deptReport.setDeptName(userInfo.getDeptName());
             deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(deptReport.getWeek()));
             deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(deptReport.getWeek()));
             deptReport.setCreatedAt(LocalDateTime.now());
@@ -154,11 +157,13 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             return deptReport;
         }
     }
+
     @Override
     @Transactional
-    public DeptReport saveAndSubmit(DeptReportVO deptReportVO) {
+    public DeptReport saveDeptReport(DeptReportVO deptReportVO) {
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
+
         if(!userInfo.getDeptId().equals(deptReportVO.getDeptId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
@@ -170,7 +175,6 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             if (flowRecord == null) {
                 throw new BusinessException(ResultCode.FLOW_IS_NULL);
             }
-            flowRecord.setCurrentStage(CommonConstants.CURRENT_STATUS_PASS);
 
             // 当前状态为已通过审批，不能修改
 //            if (CommonConstants.CURRENT_STATUS_PASS.equals(flowRecord.getCurrentStatus())) {
@@ -182,6 +186,7 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             BeanUtils.copyProperties(deptReportVO, existingDraft);
             existingDraft.setUpdatedAt(LocalDateTime.now());
             deptReportMapper.updateById(existingDraft);
+            flowRecord.setCurrentStage(CommonConstants.CURRENT_STATUS_PASS);
             flowRecordMapper.updateById(flowRecord);
 
             //创建新历史记录
@@ -208,11 +213,13 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             BeanUtils.copyProperties(deptReportVO, deptReport);
             // 创建新草稿
             deptReport.setDrId(drId);
+            deptReport.setUserId(userInfo.getUserId());
             deptReport.setFlowId(flowId);
             deptReport.setUserName(userInfo.getUserName());
-            //deptReport.setTeamId(userInfo.getTeamId());
-            //deptReport.setTeamName(userInfo.getTeamName());
-            deptReport.setDeptName(userInfo.getDepartName());
+//            deptReport.setTeamId(userInfo.getTeamId());
+//            deptReport.setTeamName(userInfo.getTeamName());
+            deptReport.setDeptId(userInfo.getDeptId());
+            deptReport.setDeptName(userInfo.getDeptName());
             deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(deptReport.getWeek()));
             deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(deptReport.getWeek()));
             deptReport.setCreatedAt(LocalDateTime.now());
@@ -249,6 +256,7 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             return deptReport;
         }
     }
+
     @Override
     public DeptReportWeekDTO getCurrentStatusAndDeptReport() {
         DeptReportWeekDTO deptReportWeekDTO = new DeptReportWeekDTO();
