@@ -35,4 +35,5 @@ public interface IPersonalReportService extends IService<PersonalReport> {
     PersonalReportStatusDTO getWeeklyReportByTime(int year, int week);
     Boolean passPersonalReport(PassVO passVO);
     Boolean cancelPersonalReport(CancelVO cancelVO);
+    PersonalReportStatusDTO getLeaderWeeklyReportByTime(int year, int week);
 }

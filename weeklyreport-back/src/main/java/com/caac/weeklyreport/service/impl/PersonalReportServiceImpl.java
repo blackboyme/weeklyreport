@@ -171,6 +171,27 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
         return personalReportStatusDTO;
     }
 
+    @Override
+    public PersonalReportStatusDTO getLeaderWeeklyReportByTime(int year, int week) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        if(!"3".equals(userInfo.getRoleType())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+        PersonalReport personalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), week,year);
+        if(personalReport == null){
+            throw new BusinessException(ResultCode.REPORT_IS_NULL);
+        }
+        FlowRecord flowRecord = flowRecordMapper.selectById(personalReport.getFlowId());
+        if(flowRecord == null){
+            throw new BusinessException(ResultCode.FLOW_IS_NULL);
+        }
+        PersonalReportStatusDTO personalReportStatusDTO = new PersonalReportStatusDTO();
+        BeanUtils.copyProperties(personalReport, personalReportStatusDTO);
+        personalReportStatusDTO.setStatus(flowRecord.getCurrentStatus());
+        personalReportStatusDTO.setComment(flowRecord.getComment());
+        return personalReportStatusDTO;
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -292,10 +313,12 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             }
 
             // 当前状态为已通过审批，不能修改
-            if (CommonConstants.CURRENT_STATUS_PASS.equals(flowRecord.getCurrentStatus())) {
-                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_PASS);
-            } else if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(flowRecord.getCurrentStatus())) {
-                throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_SUBMIT);
+            if("1".equals(userInfo.getRoleType()) || "2".equals(userInfo.getRoleType())) {
+                if (CommonConstants.CURRENT_STATUS_PASS.equals(flowRecord.getCurrentStatus())) {
+                    throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_PASS);
+                } else if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(flowRecord.getCurrentStatus())) {
+                    throw new BusinessException(ResultCode.FLOW_ACCESS_DENY_SUBMIT);
+                }
             }
 
             BeanUtils.copyProperties(personalReportVO, existingDraft);

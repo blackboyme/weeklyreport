@@ -66,10 +66,10 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
     public DeptReport saveDeptReportDraft(DeptReportVO deptReportVO) {
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
-        //userInfo中缺少部门ID deptId
-//        if(!userInfo.get().equals(deptReportVO.getDeptId())){
-//            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
-//        }
+
+        if(!userInfo.getDeptId().equals(deptReportVO.getDeptId())){
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
 
         DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), deptReportVO.getWeek(), LocalDate.now().getYear());
 
@@ -117,8 +117,8 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             deptReport.setUserId(userInfo.getUserId());
             deptReport.setFlowId(flowId);
             deptReport.setUserName(userInfo.getUserName());
-            deptReport.setTeamId(userInfo.getTeamId());
-            deptReport.setTeamName(userInfo.getTeamName());
+            //deptReport.setTeamId(userInfo.getTeamId());
+            //deptReport.setTeamName(userInfo.getTeamName());
             deptReport.setDeptId(userInfo.getDeptId());
             deptReport.setDeptName(userInfo.getDeptName());
             deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(deptReport.getWeek()));
@@ -298,7 +298,7 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
         if(!teamReports.isEmpty()) {
             for (int i = 0; i < teamReports.size(); i++) {
                 TeamReport report = teamReports.get(i);
-                String userNamePart = " (" + report.getUserName() + ")";
+                String userNamePart = " (" + report.getTeamName() + ")";
                 boolean isLast = (teamReports.size() == 1 || i == teamReports.size() - 1);
                 String separator = isLast ? "" : System.lineSeparator();
 

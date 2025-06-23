@@ -94,6 +94,11 @@ public class PersonalReportController {
         return ResultBean.success(allPersonalReportsForWeek);
     }
 
+    @ApiOperation(value = "领导工作日志查询专用-根据年份和周数获取当前状态和周报数据", notes = "领导工作日志查询专用-根据年份和周数获取当前状态和周报数据")
+    @GetMapping("/getLeaderWeeklyReportByTime/{year}/{week}")
+    public ResultBean<?> getLeaderWeeklyReportByTime(@PathVariable int year, @PathVariable int week) {
+        return ResultBean.success(personalReportService.getLeaderWeeklyReportByTime(year,week));
+    }
 
     @ApiOperation(value = "保存为草稿", notes = "保存为草稿")
     @PostMapping("/saveDraft")
