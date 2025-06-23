@@ -56,7 +56,7 @@ public class DeptReportController {
         return ResultBean.success(deptReportService.saveDeptReportDraft(deptReport));
     }
 
-    @ApiOperation(value = "部门周报保存为草稿", notes = "部门周报保存为草稿")
+    @ApiOperation(value = "部门周报正式保存", notes = "部门周报正式保存")
     @PostMapping("/submit")
     public ResultBean<?> saveDeptReport(@RequestBody DeptReportVO deptReport) {
         if (StringUtils.isEmpty(deptReport.getDeptId()) || deptReport.getWeek() == null) {

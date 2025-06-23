@@ -351,8 +351,10 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             personalReport.setPrId(prId);
             personalReport.setFlowId(flowId);
             personalReport.setUserName(userInfo.getUserName());
-            personalReport.setTeamId(userInfo.getTeamId());
-            personalReport.setTeamName(userInfo.getTeamName());
+            if("1".equals(userInfo.getRoleType()) || "2".equals(userInfo.getRoleType())) {
+                personalReport.setTeamId(userInfo.getTeamId());
+                personalReport.setTeamName(userInfo.getTeamName());
+            }
             personalReport.setDeptId(userInfo.getDeptId());
             personalReport.setDeptName(userInfo.getDeptName());
             personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));

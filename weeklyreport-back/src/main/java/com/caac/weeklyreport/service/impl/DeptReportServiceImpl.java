@@ -277,12 +277,12 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
         }
 
         // 当前状态为已通过审批、已提交，前端不允许用户打开
-        if (CommonConstants.CURRENT_STATUS_PASS.equals(deptReportWeekDTO.getCurrentStatus())
-                || CommonConstants.CURRENT_STATUS_SUBMIT.equals(deptReportWeekDTO.getCurrentStatus())) {
-            deptReportWeekDTO.setCanOperate(Boolean.FALSE);
-        } else {
-            deptReportWeekDTO.setCanOperate(Boolean.TRUE);
-        }
+//        if (CommonConstants.CURRENT_STATUS_PASS.equals(deptReportWeekDTO.getCurrentStatus())
+//                || CommonConstants.CURRENT_STATUS_SUBMIT.equals(deptReportWeekDTO.getCurrentStatus())) {
+//            deptReportWeekDTO.setCanOperate(Boolean.FALSE);
+//        } else {
+//            deptReportWeekDTO.setCanOperate(Boolean.TRUE);
+//        }
         // 封装拼接数据
         List<TeamReportStatusDTO>  teamReports = deptReportMapper.getTeamReportByStatus(userInfo.getDeptId(),
                 WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),"3");
