@@ -41,6 +41,12 @@ public class DeptReportController {
         return ResultBean.success(deptReportService.getWeeklyReportByTime(year, week));
     }
 
+    @ApiOperation(value = "根据年份和周数获取当前上周部门周报数据", notes = "根据年份和周数获取当前上周部门周报数据")
+    @GetMapping("/getLastWeeklyReportByTime/{year}/{week}")
+    public ResultBean<?> getLastWeeklyReportByTime(@PathVariable int year, @PathVariable int week) {
+        return ResultBean.success(deptReportService.getLastWeeklyReportByTime(year, week));
+    }
+
     @ApiOperation(value = "部门周报填写-获取当前状态和周报数据", notes = "部门周报填写-获取当前状态和周报数据")
     @GetMapping("/getCurrentStatusAndWeeklyReport")
     public ResultBean<?> getCurrentStatusAndWeeklyReport() {
