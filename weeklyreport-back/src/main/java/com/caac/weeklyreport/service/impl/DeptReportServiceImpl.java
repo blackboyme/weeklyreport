@@ -6,9 +6,7 @@ import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
 import com.caac.weeklyreport.entity.dto.DeptReportWeekDTO;
-import com.caac.weeklyreport.entity.dto.PersonalReportStatusDTO;
 import com.caac.weeklyreport.entity.dto.TeamReportStatusDTO;
-import com.caac.weeklyreport.entity.dto.TeamReportWeekDTO;
 import com.caac.weeklyreport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.mapper.DeptReportMapper;
@@ -277,12 +275,12 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
         }
 
         // 当前状态为已通过审批、已提交，前端不允许用户打开
-        if (CommonConstants.CURRENT_STATUS_PASS.equals(deptReportWeekDTO.getCurrentStatus())
-                || CommonConstants.CURRENT_STATUS_SUBMIT.equals(deptReportWeekDTO.getCurrentStatus())) {
-            deptReportWeekDTO.setCanOperate(Boolean.FALSE);
-        } else {
-            deptReportWeekDTO.setCanOperate(Boolean.TRUE);
-        }
+//        if (CommonConstants.CURRENT_STATUS_PASS.equals(deptReportWeekDTO.getCurrentStatus())
+//                || CommonConstants.CURRENT_STATUS_SUBMIT.equals(deptReportWeekDTO.getCurrentStatus())) {
+//            deptReportWeekDTO.setCanOperate(Boolean.FALSE);
+//        } else {
+//            deptReportWeekDTO.setCanOperate(Boolean.TRUE);
+//        }
         // 封装拼接数据
         List<TeamReportStatusDTO>  teamReports = deptReportMapper.getTeamReportByStatus(userInfo.getDeptId(),
                 WeekDateUtils.getCurrentWeekNumber(),LocalDate.now().getYear(),"3");
@@ -352,6 +350,22 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
         DeptReport deptReport = getDeptDraftByUserIdAndWeek(userInfo.getUserId(), week,year);
+        if(deptReport == null){
+            throw new BusinessException(ResultCode.REPORT_IS_NULL);
+        }
+        return deptReport;
+    }
+
+    @Override
+    public DeptReport getLastWeeklyReportByTime(int year, int week) {
+        UserInfo userInfo = UserContext.getCurrentUser();
+        DeptReport deptReport = null;
+        if (week == 1) {
+            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(LocalDate.now().getYear()-1);
+            deptReport = getDeptDraftByUserIdAndWeek(userInfo.getDeptId(), lastYearTotalWeek, LocalDate.now().getYear()-1);
+        } else {
+            deptReport = getDeptDraftByUserIdAndWeek(userInfo.getDeptId(), week-1, LocalDate.now().getYear());
+        }
         if(deptReport == null){
             throw new BusinessException(ResultCode.REPORT_IS_NULL);
         }
