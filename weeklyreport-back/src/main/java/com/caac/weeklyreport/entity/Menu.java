@@ -68,6 +68,7 @@ public class Menu implements Serializable {
 
     @ApiModelProperty(value = "更新时间")
     @TableField("updated_at")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime updatedAt;
 
     @ApiModelProperty(value = "是否删除(1-删除,0-正常)")
