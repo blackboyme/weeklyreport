@@ -43,6 +43,7 @@ public class RoleMenu implements Serializable {
 
     @ApiModelProperty(value = "创建时间")
     @TableField("created_at")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     @ApiModelProperty(value = "更新时间")

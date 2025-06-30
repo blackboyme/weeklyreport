@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -107,10 +109,12 @@ public class DeptReport implements Serializable {
 
     @ApiModelProperty(value = "创建时间")
     @TableField("created_at")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     @ApiModelProperty(value = "更新时间")
     @TableField("updated_at")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime updatedAt;
 
     @ApiModelProperty(value = "是否删除(0-正常,1-删除)")
