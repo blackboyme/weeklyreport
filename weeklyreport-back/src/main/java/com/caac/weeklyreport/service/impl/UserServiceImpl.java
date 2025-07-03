@@ -10,6 +10,7 @@ import com.caac.weeklyreport.entity.UserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,8 +27,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public User createUser(User user) {
         user.setUserId(UUID.randomUUID().toString());
         user.setIsDeleted("0");
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
         userMapper.insert(user);
-        return getUserById(user.getRoleId());
+        return getUserById(user.getUserId());
     }
 
     @Override
