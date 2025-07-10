@@ -3,15 +3,16 @@ package com.caac.weeklyreport.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.entity.User;
+import com.caac.weeklyreport.entity.UserInfo;
 import com.caac.weeklyreport.mapper.UserMapper;
 import com.caac.weeklyreport.service.UserService;
+import com.caac.weeklyreport.util.KeyGeneratorUtil;
 import com.caac.weeklyreport.util.TokenUtil;
-import com.caac.weeklyreport.entity.UserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service("userService")
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
@@ -24,10 +25,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User createUser(User user) {
-        user.setUserId(UUID.randomUUID().toString());
+        user.setUserId(KeyGeneratorUtil.generateUUID());
         user.setIsDeleted("0");
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
         userMapper.insert(user);
-        return getUserById(user.getRoleId());
+        return getUserById(user.getUserId());
     }
 
     @Override
