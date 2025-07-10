@@ -1,5 +1,6 @@
 package com.caac.weeklyreport.controller;
 
+import com.caac.weeklyreport.common.PassToken;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.entity.PersonalReport;
@@ -15,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -159,5 +161,11 @@ public class PersonalReportController {
     public ResponseEntity<Void> deletePersonalReport(@PathVariable String id) {
         personalReportService.deletePersonalReport(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PassToken
+    @GetMapping("/exportPersonalReportExcel/{teamId}/{week}/{year}")
+    public void exportPersonalReportExcel(@PathVariable String teamId,@PathVariable int week,@PathVariable int year,HttpServletResponse response) {
+        personalReportService.exportPersonalReportExcel(teamId,week,year,response);
     }
 }

@@ -9,6 +9,7 @@ import com.caac.weeklyreport.entity.vo.CancelVO;
 import com.caac.weeklyreport.entity.vo.PassVO;
 import com.caac.weeklyreport.entity.vo.PersonalReportVO;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -36,4 +37,5 @@ public interface IPersonalReportService extends IService<PersonalReport> {
     Boolean passPersonalReport(PassVO passVO);
     Boolean cancelPersonalReport(CancelVO cancelVO);
     PersonalReportStatusDTO getLeaderWeeklyReportByTime(int year, int week);
+    void exportPersonalReportExcel(String teamId,int startTime,int endTIme,HttpServletResponse response);
 }
