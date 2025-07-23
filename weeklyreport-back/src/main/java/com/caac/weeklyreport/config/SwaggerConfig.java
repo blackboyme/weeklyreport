@@ -21,7 +21,7 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.OAS_30)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.caac.weeklyreport.controller")) // 指定扫描的包路径
+                .apis(RequestHandlerSelectors.basePackage("com.caac.weeklyreport.biz.**.controller")) // 指定扫描的包路径
                 .paths(PathSelectors.any())                              // 或者可以指定哪些路径下的接口需要生成文档
                 .build()
                 .apiInfo(metaData());

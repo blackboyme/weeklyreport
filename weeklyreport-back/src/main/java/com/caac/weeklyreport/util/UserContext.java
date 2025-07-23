@@ -1,6 +1,6 @@
 package com.caac.weeklyreport.util;
 
-import com.caac.weeklyreport.entity.UserInfo;
+import com.caac.weeklyreport.biz.user.entity.UserInfo;
 
 public class UserContext {
     private static final ThreadLocal<UserInfo> currentUser = new ThreadLocal<>();

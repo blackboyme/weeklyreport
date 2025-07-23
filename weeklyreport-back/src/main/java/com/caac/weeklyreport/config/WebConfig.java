@@ -20,6 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/v1/users/loginAndGetPhone")
                 .excludePathPatterns("/swagger**/**",
                         "/webjars/**",
+                        "/favicon.ico",
                         "/v3/**",
                         "/doc.html");
     }

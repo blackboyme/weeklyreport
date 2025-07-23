@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+@MapperScan("com.caac.weeklyreport.biz.**.mapper")
 @MapperScan("com.caac.weeklyreport.mapper")
 public class WeeklyReportApplication {
 

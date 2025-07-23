@@ -2,6 +2,9 @@ package com.caac.weeklyreport.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.caac.weeklyreport.biz.user.entity.User;
+import com.caac.weeklyreport.biz.user.entity.UserInfo;
+import com.caac.weeklyreport.biz.user.mapper.UserMapper;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.entity.*;
@@ -25,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 

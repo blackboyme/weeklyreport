@@ -1,7 +1,7 @@
 package com.caac.weeklyreport.util;
 
 import com.caac.weeklyreport.config.TokenConfig;
-import com.caac.weeklyreport.entity.UserInfo;
+import com.caac.weeklyreport.biz.user.entity.UserInfo;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
