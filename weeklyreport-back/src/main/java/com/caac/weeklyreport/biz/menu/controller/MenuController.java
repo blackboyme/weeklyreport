@@ -6,6 +6,8 @@ import com.caac.weeklyreport.biz.menu.entity.Menu;
 import com.caac.weeklyreport.biz.user.entity.UserInfo;
 import com.caac.weeklyreport.biz.menu.service.IMenuService;
 import com.caac.weeklyreport.util.UserContext;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v1/menu")
+@Api(value = "菜单管理",tags="菜单管理")
 public class MenuController {
 
     private final IMenuService IMenuService;
@@ -28,6 +31,7 @@ public class MenuController {
         this.IMenuService = IMenuService;
     }
 
+    @ApiOperation("获取当前用户的菜单")
     @GetMapping
     public ResultBean<?> getMenu() {
         UserInfo currentUser = UserContext.getCurrentUser();

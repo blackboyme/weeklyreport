@@ -35,10 +35,22 @@ public class Team implements Serializable {
     private String teamName;
 
     /**
+     * 部门ID
+     */
+    @TableField("dept_id")
+    private String deptId;
+
+    /**
      * 部门名称
      */
     @TableField("depart_name")
     private String departName;
+
+    /**
+     * 填写标题
+     */
+    @TableField("team_title")
+    private String teamTitle;
 
     /**
      * 创建时间
@@ -103,12 +115,29 @@ public class Team implements Serializable {
         this.isDeleted = isDeleted;
     }
 
+    public String getTeamTitle() {
+        return teamTitle;
+    }
+
+    public void setTeamTitle(String teamTitle) {
+        this.teamTitle = teamTitle;
+    }
+
+    public String getDeptId() {
+        return deptId;
+    }
+
+    public void setDeptId(String deptId) {
+        this.deptId = deptId;
+    }
     @Override
     public String toString() {
         return "Team{" +
             "teamId=" + teamId +
             ", teamName=" + teamName +
+            ", deptId=" + deptId +
             ", departName=" + departName +
+            ", teamTitle=" + teamTitle +
             ", createdAt=" + createdAt +
             ", updatedAt=" + updatedAt +
             ", isDeleted=" + isDeleted +
