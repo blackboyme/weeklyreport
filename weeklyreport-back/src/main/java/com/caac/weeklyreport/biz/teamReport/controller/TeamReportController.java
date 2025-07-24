@@ -1,0 +1,91 @@
+package com.caac.weeklyreport.biz.teamReport.controller;
+
+import com.caac.weeklyreport.biz.teamReport.entity.vo.TeamReportVO;
+import com.caac.weeklyreport.biz.teamReport.service.ITeamReportService;
+import com.caac.weeklyreport.common.ResultBean;
+import com.caac.weeklyreport.common.ResultCode;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * <p>
+ * 团队周报表 前端控制器
+ * </p>
+ *
+ * @author hanrenjie
+ * @since 2025-06-05
+ */
+@RestController
+@RequestMapping("/api/v1/team-report")
+@Api(value = "团队周报管理", tags = "团队周报管理")
+public class TeamReportController {
+
+    private final ITeamReportService teamReportService;
+
+    public TeamReportController(ITeamReportService teamReportService) {
+        this.teamReportService = teamReportService;
+    }
+
+    @ApiOperation(value = "团队周报保存为草稿", notes = "团队周报保存为草稿")
+    @PostMapping("/saveDraft")
+    public ResultBean<?> saveTeamReportDraft(@RequestBody TeamReportVO teamReport) {
+        if (StringUtils.isEmpty(teamReport.getTeamId()) || teamReport.getWeek() == null) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(teamReportService.saveTeamReportDraft(teamReport));
+    }
+
+    @ApiOperation(value = "团队周报提交", notes = "团队周报提交")
+    @PostMapping("/submit")
+    public ResultBean<?> submitPersonalReport(@RequestBody TeamReportVO teamReport) {
+        if (StringUtils.isEmpty(teamReport.getTeamId()) || teamReport.getWeek() == null) {
+            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+        }
+        return ResultBean.success(teamReportService.submitTeamReport(teamReport));
+    }
+
+    @ApiOperation(value = "团队周报填写-获取当前状态和周报数据", notes = "团队周报填写-获取当前状态和周报数据")
+    @GetMapping("/getCurrentStatusAndWeeklyReport")
+    public ResultBean<?> getCurrentStatusAndWeeklyReport() {
+        return ResultBean.success(teamReportService.getCurrentStatusAndWeeklyReport());
+    }
+
+    @ApiOperation(value = "根据年份和周数获取当前状态和周报数据", notes = "根据年份和周数获取当前状态和周报数据")
+    @GetMapping("/getWeeklyReportByTime/{year}/{week}/{teamId}")
+    public ResultBean<?> getWeeklyReportByTime(@PathVariable int year, @PathVariable int week,@PathVariable String teamId) {
+        return ResultBean.success(teamReportService.getWeeklyReportByTime(year, week,teamId));
+    }
+//
+
+//
+//    @ApiOperation(value = "根据状态团队领导查询所有团队成员周报", notes = "根据状态团队领导查询所有团队成员周报")
+//    @PostMapping("/approveList")
+//    public ResultBean<?> getAllTeamReportByStatus(@RequestBody StatusVO statusVO) {
+//        List<TeamReportStatusDTO> allPersonalReportsForWeek = teamReportService.getAllTeamReportByStatus(statusVO.getStatus());
+//        return ResultBean.success(allPersonalReportsForWeek);
+//    }
+//
+//
+//
+//    @ApiOperation(value = "团队周报审核通过", notes = "团队审核通过")
+//    @PostMapping("/pass")
+//    public ResultBean<?> passPersonalReport(@RequestBody PassVO passVO) {
+//        if (StringUtils.isEmpty(passVO.getTrId())) {
+//            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+//        }
+//        return ResultBean.success(teamReportService.passTeamReport(passVO));
+//    }
+//
+//    @ApiOperation(value = "团队周报退回", notes = "团队周报退回")
+//    @PostMapping("/cancel")
+//    public ResultBean<?> cancelPersonalReport(@RequestBody CancelVO cancelVO) {
+//        if (StringUtils.isEmpty(cancelVO.getTrId())) {
+//            return ResultBean.fail(ResultCode.PARAM_IS_NULL);
+//        }
+//        return ResultBean.success(teamReportService.cancelTeamReport(cancelVO));
+//    }
+
+
+}

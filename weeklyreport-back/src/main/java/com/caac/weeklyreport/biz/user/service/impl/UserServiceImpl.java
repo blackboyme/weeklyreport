@@ -63,7 +63,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public UserInfo login(String phoneNo,String openId) {
         // 使用新的查询方法获取完整的用户信息
         UserInfo userInfo = userMapper.getUserInfoByPhoneNo(phoneNo);
-        if (userInfo != null) {
+        if (userInfo == null) {
             // 生成新的token
             String newToken = TokenUtil.generateToken(userInfo);
             // 更新用户token
@@ -74,8 +74,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 user.setOpenId(openId);
             }
             userMapper.updateById(user);
-            // 设置token到userInfo
-            userInfo.setToken(newToken);
             return userMapper.getUserInfoByPhoneNo(phoneNo);
         }
         return null;

@@ -1,7 +1,7 @@
 package com.caac.weeklyreport.biz.team.mapper;
 
-import com.caac.weeklyreport.biz.team.entity.Team;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.caac.weeklyreport.biz.team.entity.Team;
 
 /**
  * <p>

@@ -1,7 +1,7 @@
 package com.caac.weeklyreport.biz.roleMenu.mapper;
 
-import com.caac.weeklyreport.biz.roleMenu.entity.RoleMenu;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.caac.weeklyreport.biz.roleMenu.entity.RoleMenu;
 
 /**
  * <p>

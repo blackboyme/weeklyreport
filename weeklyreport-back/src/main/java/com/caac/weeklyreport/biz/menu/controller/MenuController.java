@@ -1,14 +1,16 @@
 package com.caac.weeklyreport.biz.menu.controller;
 
+import com.caac.weeklyreport.biz.menu.entity.Menu;
+import com.caac.weeklyreport.biz.menu.service.IMenuService;
+import com.caac.weeklyreport.biz.user.entity.UserInfo;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
-import com.caac.weeklyreport.biz.menu.entity.Menu;
-import com.caac.weeklyreport.biz.user.entity.UserInfo;
-import com.caac.weeklyreport.biz.menu.service.IMenuService;
 import com.caac.weeklyreport.util.UserContext;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 

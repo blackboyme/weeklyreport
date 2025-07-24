@@ -1,8 +1,8 @@
 package com.caac.weeklyreport.interceptor;
 
-import com.caac.weeklyreport.common.PassToken;
 import com.caac.weeklyreport.biz.user.entity.UserInfo;
 import com.caac.weeklyreport.biz.user.service.UserService;
+import com.caac.weeklyreport.common.PassToken;
 import com.caac.weeklyreport.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

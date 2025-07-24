@@ -1,7 +1,7 @@
 package com.caac.weeklyreport.biz.team.service;
 
-import com.caac.weeklyreport.biz.team.entity.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.caac.weeklyreport.biz.team.entity.Team;
 
 import java.util.List;
 
@@ -15,4 +15,5 @@ import java.util.List;
  */
 public interface ITeamService extends IService<Team> {
     List<Team> getAllTeams();
+    Team getTeamByTeamId(String teamId);
 }

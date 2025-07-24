@@ -1,15 +1,15 @@
 package com.caac.weeklyreport.util;
 
-import com.caac.weeklyreport.config.TokenConfig;
 import com.caac.weeklyreport.biz.user.entity.UserInfo;
+import com.caac.weeklyreport.config.TokenConfig;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Base64;
 
 @Component
 public class TokenUtil {

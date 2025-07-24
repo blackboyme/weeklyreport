@@ -15,7 +15,7 @@ public interface UserMapper extends BaseMapper<User> {
             "u.user_id, u.user_name,u.open_id, u.team_id, u.phone_no, u.role_id, u.token, " +
             "u.created_at, u.updated_at, u.is_deleted, " +
             "r.role_name, r.role_type, " +
-            "t.team_name,d.dept_id,d.dept_name " +
+            "t.team_name,t.team_title,d.dept_id,d.dept_name " +
             "FROM user u " +
             "LEFT JOIN role r ON u.role_id = r.role_id " +
             "LEFT JOIN team t ON u.team_id = t.team_id " +
