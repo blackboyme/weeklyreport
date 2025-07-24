@@ -7,7 +7,7 @@ import com.caac.weeklyreport.biz.user.entity.vo.LoginVO;
 import com.caac.weeklyreport.biz.user.service.UserService;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
-import com.caac.weeklyreport.entity.dto.PhoneInfo;
+import com.caac.weeklyreport.biz.user.entity.PhoneInfo;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.util.LogBacks;
 import com.fasterxml.jackson.core.JsonProcessingException;

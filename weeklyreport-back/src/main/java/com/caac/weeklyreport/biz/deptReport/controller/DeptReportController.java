@@ -4,6 +4,7 @@ import com.caac.weeklyreport.biz.deptReport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.biz.deptReport.service.IDeptReportService;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/v1/dept-report")
+@Api(value = "部门周报管理",tags="部门周报管理")
 public class DeptReportController {
 
     private final IDeptReportService deptReportService;

@@ -1,4 +1,4 @@
-package com.caac.weeklyreport.entity.dto;
+package com.caac.weeklyreport.biz.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
