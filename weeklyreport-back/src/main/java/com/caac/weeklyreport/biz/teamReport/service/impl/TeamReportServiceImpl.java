@@ -156,7 +156,6 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
         // 没有暂存团队周报
         if(currentTeamReport == null){
             teamReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
-            teamReportWeekDTO.setCurrentWeekTeamReport(currentTeamReport);
         } else {// 有暂存或以提交的团队周报
             teamReportWeekDTO.setCurrentStatus(currentTeamReport.getCurrentStatus());
             teamReportWeekDTO.setCurrentWeekTeamReport(currentTeamReport);

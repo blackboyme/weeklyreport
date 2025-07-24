@@ -3,9 +3,13 @@ package com.caac.weeklyreport.biz.deptReport.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.biz.deptReport.entity.DeptReport;
+import com.caac.weeklyreport.biz.deptReport.entity.dto.DeptReportWeekDTO;
 import com.caac.weeklyreport.biz.deptReport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.biz.deptReport.mapper.DeptReportMapper;
 import com.caac.weeklyreport.biz.deptReport.service.IDeptReportService;
+import com.caac.weeklyreport.biz.teamReport.entity.TeamReport;
+import com.caac.weeklyreport.biz.teamReport.entity.dto.TeamReportWeekDTO;
+import com.caac.weeklyreport.biz.teamReport.mapper.TeamReportMapper;
 import com.caac.weeklyreport.biz.user.entity.UserInfo;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
@@ -20,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -33,6 +38,9 @@ import java.time.LocalDateTime;
 public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptReport> implements IDeptReportService {
     @Autowired
     private DeptReportMapper deptReportMapper;
+
+    @Autowired
+    private TeamReportMapper teamReportMapper;
 
 
     @Override
@@ -130,6 +138,39 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             throw new BusinessException(ResultCode.REPORT_IS_NULL);
         }
         return deptReport;
+    }
+
+    @Override
+    public DeptReportWeekDTO getCurrentStatusAndDeptReport() {
+        DeptReportWeekDTO deptReportWeekDTO = new DeptReportWeekDTO();
+        UserInfo userInfo = UserContext.getCurrentUser();
+        int currentWeek =  WeekDateUtils.getCurrentWeekNumber();
+        DeptReport currentDeptReport = getDeptDraftByUserIdAndWeek(userInfo.getDeptId(), currentWeek, LocalDate.now().getYear());
+        // 没有暂存部门周报
+        if(currentDeptReport == null){
+            deptReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
+        } else {// 有暂存或以提交的部门周报
+            deptReportWeekDTO.setCurrentStatus(currentDeptReport.getCurrentStatus());
+            deptReportWeekDTO.setCurrentWeekDeptReport(currentDeptReport);
+        }
+
+        // 当前状态为已提交，前端不允许用户打开
+        if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(deptReportWeekDTO.getCurrentStatus())) {
+            deptReportWeekDTO.setCanOperate(Boolean.FALSE);
+        } else {
+            deptReportWeekDTO.setCanOperate(Boolean.TRUE);
+        }
+
+        QueryWrapper<TeamReport> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("dept_id", userInfo.getDeptId())
+                .eq("week", currentWeek)
+                .eq("is_deleted", "0")
+                .apply("YEAR(created_at) = {0}", LocalDate.now().getYear());
+
+        List<TeamReport> teamReports = teamReportMapper.selectList(queryWrapper);
+        deptReportWeekDTO.setTeamReports(teamReports);
+
+        return deptReportWeekDTO;
     }
 
     public DeptReport getDeptDraftByUserIdAndWeek(String deptId, int week, int year) {
