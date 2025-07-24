@@ -12,6 +12,7 @@ import com.caac.weeklyreport.util.LogBacks;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.lang3.StringUtils;
@@ -28,9 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api("登录管理")
 @RestController
 @RequestMapping("/api/v1/users")
+@Api(value = "登录",tags="登录")
 public class UserController {
 
     @Autowired
@@ -42,37 +43,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "根据 ID 获取客户信息", description = "客户必须存在")
-    @PostMapping("/createUser")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User createdUser = userService.createUser(user);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable String id) {
-        User user = userService.getUserById(id);
-        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/getAllUsers")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
-    }
-
-    @PostMapping("/updateUser")
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        User updatedUser = userService.updateUser(user);
-        return updatedUser != null ? ResponseEntity.ok(updatedUser) : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/deleteUser/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
-
+    @ApiOperation(value = "自行登录", tags = "登录")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
         String phoneNo = loginRequest.get("phoneNo");
@@ -91,6 +62,7 @@ public class UserController {
     /*
     * 新登录接口
     * */
+    @ApiOperation(value = "微信登录", tags = "登录")
     @PostMapping("/loginAndGetPhone")
     public ResponseEntity<?> getPhoneNumber(@RequestBody LoginVO loginVO) {
         String encryptedData = loginVO.getEncryptedData();
@@ -171,6 +143,8 @@ public class UserController {
         }
     }
 
+
+    @ApiOperation(value = "验证token", tags = "登录")
     @PostMapping("/validate-token")
     public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -186,6 +160,7 @@ public class UserController {
         }
     }
 
+    @ApiOperation(value = "刷新token", tags = "登录")
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

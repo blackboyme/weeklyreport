@@ -20,14 +20,15 @@ public class SwaggerConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.OAS_30)
+                .enable(true)
+                .apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.caac.weeklyreport.biz.**.controller")) // 指定扫描的包路径
+                .apis(RequestHandlerSelectors.basePackage("com.caac.weeklyreport")) // 指定扫描的包路径
                 .paths(PathSelectors.any())                              // 或者可以指定哪些路径下的接口需要生成文档
-                .build()
-                .apiInfo(metaData());
+                .build();
     }
 
-    private ApiInfo metaData() {
+    private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("周报系统")              // 网页标题
                 .description("周报系统")  // 描述
