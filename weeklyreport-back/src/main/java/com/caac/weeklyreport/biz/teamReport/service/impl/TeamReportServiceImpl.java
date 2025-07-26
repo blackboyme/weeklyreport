@@ -255,7 +255,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
         queryWrapper.eq("team_id", teamId)
                 .eq("week", week)
                 .eq("is_deleted", "0")
-                .apply("YEAR(created_at) = {0}", year);
+                .eq("year", year);
         return teamReportMapper.selectOne(queryWrapper);
     }
 

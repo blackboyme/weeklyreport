@@ -181,6 +181,15 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
     public PersonalReport getPersonalReportById(String id) {
         return personalReportMapper.selectById(id);
     }
+
+    public PersonalReport getDraftByUserIdAndWeek(String userId, int week,int year) {
+        QueryWrapper<PersonalReport> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId)
+                .eq("week", week)
+                .eq("is_deleted", "0")
+                .eq("year", year);
+        return personalReportMapper.selectOne(queryWrapper);
+    }
 //
 //    @Override
 //    public List<PersonalReport> getAllPersonalReports() {
@@ -380,14 +389,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
 //
 //
 //
-    public PersonalReport getDraftByUserIdAndWeek(String userId, int week,int year) {
-        QueryWrapper<PersonalReport> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId)
-                   .eq("week", week)
-                   .eq("is_deleted", "0")
-                   .apply("YEAR(created_at) = {0}", year);
-        return personalReportMapper.selectOne(queryWrapper);
-    }
+
 //
 //
 ////    public List<PersonalReport> getAllPersonalReportByTeamIdAndWeekAndYear(String teamId, int week,int year) {

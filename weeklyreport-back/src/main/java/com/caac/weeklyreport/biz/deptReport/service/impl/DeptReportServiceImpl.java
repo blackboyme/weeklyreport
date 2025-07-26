@@ -178,7 +178,7 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
         queryWrapper.eq("dept_id", deptId)
                 .eq("week", week)
                 .eq("is_deleted", "0")
-                .apply("YEAR(created_at) = {0}", year);
+                .eq("year", year);
         return deptReportMapper.selectOne(queryWrapper);
     }
 

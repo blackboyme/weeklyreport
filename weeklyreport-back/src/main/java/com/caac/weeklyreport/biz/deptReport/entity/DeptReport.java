@@ -1,6 +1,7 @@
 package com.caac.weeklyreport.biz.deptReport.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -59,6 +60,10 @@ public class DeptReport implements Serializable {
 
     @ApiModelProperty(value = "周数")
     private Integer week;
+
+    @ApiModelProperty(value = "周数")
+    @TableField("year")
+    private Integer year;
 
     @ApiModelProperty(value = "本周主要工作")
     private String summary;
