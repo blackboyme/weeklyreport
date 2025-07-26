@@ -1,8 +1,11 @@
 package com.caac.weeklyreport.biz.personalReport.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.biz.personalReport.entity.PersonalReport;
+import com.caac.weeklyreport.biz.personalReport.entity.dto.PersonalReportExcelDTO;
 import com.caac.weeklyreport.biz.personalReport.entity.dto.PersonalReportWeekDTO;
 import com.caac.weeklyreport.biz.personalReport.entity.vo.PersonalReportVO;
 import com.caac.weeklyreport.biz.personalReport.mapper.PersonalReportMapper;
@@ -13,6 +16,7 @@ import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
+import com.caac.weeklyreport.util.LogBacks;
 import com.caac.weeklyreport.util.UserContext;
 import com.caac.weeklyreport.util.WeekDateUtils;
 import org.springframework.beans.BeanUtils;
@@ -20,8 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -195,6 +201,32 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
                 .eq("year", year);
         return personalReportMapper.selectOne(queryWrapper);
     }
+
+
+    @Override
+    public void exportPersonalReportExcel(String teamId, int week, int year, HttpServletResponse response) {
+        List<PersonalReportExcelDTO> resultList  = personalReportMapper.getExportPersonalReport(teamId,
+                week,year);
+
+        try {
+            //HttpServletResponse消息头参数设置
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Transfer-Encoding", "binary");
+            response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+            response.setHeader("Pragma", "public");
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8");
+            String fileName = "个人周报第"+week+"周报"+ ".xlsx";
+            fileName = new String(fileName.getBytes(), "ISO-8859-1");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName );
+            EasyExcel.write(response.getOutputStream(), PersonalReportExcelDTO.class)
+                    .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 启用自适应
+                    .autoCloseStream(Boolean.FALSE)
+                    .sheet("团队周报")
+                    .doWrite(resultList);
+        } catch (Exception e) {
+            LogBacks.error(e.getMessage());
+        }
+    }
 //
 //    @Override
 //    public List<PersonalReport> getAllPersonalReports() {
@@ -264,30 +296,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
 //        return personalReportStatusDTO;
 //    }
 //
-//    @Override
-//    public void exportPersonalReportExcel(String teamId,int week,int year,HttpServletResponse response) {
-//        List<PersonalReportExcelDTO>  resultList  = personalReportMapper.getExportPersonalReport(teamId,
-//                week,year);
-//
-//        try {
-//            //HttpServletResponse消息头参数设置
-//            response.setCharacterEncoding("UTF-8");
-//            response.setHeader("Content-Transfer-Encoding", "binary");
-//            response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
-//            response.setHeader("Pragma", "public");
-//            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8");
-//            String fileName = "导出团队第"+week+"周报列表"+ ".xlsx";
-//            fileName = new String(fileName.getBytes(), "ISO-8859-1");
-//            response.setHeader("Content-Disposition", "attachment;filename=" + fileName );
-//            EasyExcel.write(response.getOutputStream(), PersonalReportExcelDTO.class)
-//                    .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 启用自适应
-//                    .autoCloseStream(Boolean.FALSE)
-//                    .sheet("团队周报")
-//                    .doWrite(resultList);
-//        } catch (Exception e) {
-//            LogBacks.error(e.getMessage());
-//        }
-//    }
+
 //
 //
 //    @Override

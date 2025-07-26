@@ -5,6 +5,8 @@ import com.caac.weeklyreport.biz.personalReport.entity.PersonalReport;
 import com.caac.weeklyreport.biz.personalReport.entity.dto.PersonalReportWeekDTO;
 import com.caac.weeklyreport.biz.personalReport.entity.vo.PersonalReportVO;
 
+import javax.servlet.http.HttpServletResponse;
+
 
 /**
  * <p>
@@ -19,18 +21,6 @@ public interface IPersonalReportService extends IService<PersonalReport> {
     PersonalReport submitPersonalReport(PersonalReportVO personalReport);
     PersonalReportWeekDTO getCurrentStatusAndWeeklyReport(int year, int week);
     PersonalReport getWeeklyReportByTime(int year, int week);
-    //    PersonalReport updatePersonalReport(PersonalReport personalReport);
-//    List<PersonalReport> getAllPersonalReports();
-//    PersonalReport getPersonalReportById(String id);
-//    PersonalReport createPersonalReport(PersonalReport personalReport);
-//    void deletePersonalReport(String id);
-//    PersonalReport getDraftByUserIdAndWeek(String userId, int week, int year);
-//    ResultBean<PersonalReport> frontPersonalReportCheck(String userId, int week);
-//    List<PersonalReport> getAllPersonalReportsForWeek(String userId, int year, int week);
-//    List<PersonalReportStatusDTO> getAllPersonalReportByStatus(String status);
+    void exportPersonalReportExcel(String teamId, int startTime, int endTIme, HttpServletResponse response);
 
-//    Boolean passPersonalReport(PassVO passVO);
-//    Boolean cancelPersonalReport(CancelVO cancelVO);
-//    PersonalReportStatusDTO getLeaderWeeklyReportByTime(int year, int week);
-//    void exportPersonalReportExcel(String teamId, int startTime, int endTIme, HttpServletResponse response);
 }
