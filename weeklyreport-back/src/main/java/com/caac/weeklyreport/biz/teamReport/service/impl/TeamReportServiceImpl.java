@@ -154,11 +154,10 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
 
 
     @Override
-    public TeamReportWeekDTO getCurrentStatusAndWeeklyReport() {
+    public TeamReportWeekDTO getCurrentStatusAndWeeklyReport(int year, int week) {
         TeamReportWeekDTO teamReportWeekDTO = new TeamReportWeekDTO();
         UserInfo userInfo = UserContext.getCurrentUser();
-        int currentWeek =  WeekDateUtils.getCurrentWeekNumber();
-        TeamReport currentTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getTeamId(), currentWeek, LocalDate.now().getYear());
+        TeamReport currentTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getTeamId(), week, year);
         // 没有暂存团队周报
         if(currentTeamReport == null){
             teamReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
@@ -175,19 +174,19 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
         }
 
         TeamReport lastWeekTeamReport = null;
-        if (currentWeek == 1) {
-            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(LocalDate.now().getYear()-1);
-            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getTeamId(), lastYearTotalWeek, LocalDate.now().getYear()-1);
+        if (week == 1) {
+            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(year-1);
+            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getTeamId(), lastYearTotalWeek, year-1);
         } else {
-            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getTeamId(), currentWeek-1, LocalDate.now().getYear());
+            lastWeekTeamReport = getTeamDraftByUserIdAndWeek(userInfo.getTeamId(), week-1, year);
         }
         teamReportWeekDTO.setLastWeekTeamReport(lastWeekTeamReport);
 
         QueryWrapper<PersonalReport> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("team_id", userInfo.getTeamId())
                 .eq("current_status", CommonConstants.CURRENT_STATUS_SUBMIT)
-                .eq("week", currentWeek)
-                .eq("year", currentWeek);
+                .eq("week", week)
+                .eq("year", year);
         List<PersonalReport> personalReports = personalReportMapper.selectList(queryWrapper);
         // 封装拼接数据
         StringBuilder major =  new StringBuilder();

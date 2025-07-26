@@ -8,7 +8,6 @@ import com.caac.weeklyreport.biz.deptReport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.biz.deptReport.mapper.DeptReportMapper;
 import com.caac.weeklyreport.biz.deptReport.service.IDeptReportService;
 import com.caac.weeklyreport.biz.teamReport.entity.TeamReport;
-import com.caac.weeklyreport.biz.teamReport.entity.dto.TeamReportWeekDTO;
 import com.caac.weeklyreport.biz.teamReport.mapper.TeamReportMapper;
 import com.caac.weeklyreport.biz.user.entity.UserInfo;
 import com.caac.weeklyreport.common.ResultCode;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -147,11 +145,10 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
     }
 
     @Override
-    public DeptReportWeekDTO getCurrentStatusAndDeptReport() {
+    public DeptReportWeekDTO getCurrentStatusAndDeptReport(int year, int week) {
         DeptReportWeekDTO deptReportWeekDTO = new DeptReportWeekDTO();
         UserInfo userInfo = UserContext.getCurrentUser();
-        int currentWeek =  WeekDateUtils.getCurrentWeekNumber();
-        DeptReport currentDeptReport = getDeptDraftByUserIdAndWeek(userInfo.getDeptId(), currentWeek, LocalDate.now().getYear());
+        DeptReport currentDeptReport = getDeptDraftByUserIdAndWeek(userInfo.getDeptId(), week, year);
         // 没有暂存部门周报
         if(currentDeptReport == null){
             deptReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
@@ -169,9 +166,9 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
 
         QueryWrapper<TeamReport> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("dept_id", userInfo.getDeptId())
-                .eq("week", currentWeek)
+                .eq("week", week)
                 .eq("is_deleted", "0")
-                .apply("YEAR(created_at) = {0}", LocalDate.now().getYear());
+                .apply("year", year);
 
         List<TeamReport> teamReports = teamReportMapper.selectList(queryWrapper);
         deptReportWeekDTO.setTeamReports(teamReports);

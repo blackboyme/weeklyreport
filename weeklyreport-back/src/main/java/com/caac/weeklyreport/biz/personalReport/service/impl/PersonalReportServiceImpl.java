@@ -160,7 +160,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
 
         PersonalReport lastWeekPersonalReport = null;
         if (week == 1) {
-            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(LocalDate.now().getYear()-1);
+            int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(year-1);
             lastWeekPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), lastYearTotalWeek, year-1);
         } else {
             lastWeekPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), week-1, year);

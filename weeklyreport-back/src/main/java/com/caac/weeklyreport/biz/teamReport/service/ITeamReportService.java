@@ -16,7 +16,7 @@ import com.caac.weeklyreport.biz.teamReport.entity.vo.TeamReportVO;
 public interface ITeamReportService extends IService<TeamReport> {
     TeamReport saveTeamReportDraft(TeamReportVO teamReportVO);
     TeamReport submitTeamReport(TeamReportVO teamReport);
-    TeamReportWeekDTO getCurrentStatusAndWeeklyReport();
+    TeamReportWeekDTO getCurrentStatusAndWeeklyReport(int year, int week);
     TeamReport getWeeklyReportByTime(int year, int week, String teamId);
 //    TeamReport createTeamReport(TeamReport teamReport);
 //    TeamReport getTeamReportById(String id);
