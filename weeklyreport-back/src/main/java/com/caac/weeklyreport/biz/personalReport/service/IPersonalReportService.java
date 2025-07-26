@@ -21,6 +21,6 @@ public interface IPersonalReportService extends IService<PersonalReport> {
     PersonalReport submitPersonalReport(PersonalReportVO personalReport);
     PersonalReportWeekDTO getCurrentStatusAndWeeklyReport(int year, int week);
     PersonalReport getWeeklyReportByTime(int year, int week);
-    void exportPersonalReportExcel(String teamId, int startTime, int endTIme, HttpServletResponse response);
+    void exportPersonalReportExcel(String userId, int startWeek, int endWeek,int year, HttpServletResponse response);
 
 }

@@ -5,6 +5,8 @@ import com.caac.weeklyreport.biz.teamReport.entity.TeamReport;
 import com.caac.weeklyreport.biz.teamReport.entity.dto.TeamReportWeekDTO;
 import com.caac.weeklyreport.biz.teamReport.entity.vo.TeamReportVO;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * <p>
  * 团队周报表 服务类
@@ -18,6 +20,7 @@ public interface ITeamReportService extends IService<TeamReport> {
     TeamReport submitTeamReport(TeamReportVO teamReport);
     TeamReportWeekDTO getCurrentStatusAndWeeklyReport(int year, int week);
     TeamReport getWeeklyReportByTime(int year, int week, String teamId);
+    void exportTeamReportExcel(String teamId, int startWeek, int endWeek,int year, HttpServletResponse response);
 //    TeamReport createTeamReport(TeamReport teamReport);
 //    TeamReport getTeamReportById(String id);
 //    List<TeamReport> getAllTeamReports();

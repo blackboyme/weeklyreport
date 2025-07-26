@@ -5,6 +5,8 @@ import com.caac.weeklyreport.biz.deptReport.entity.DeptReport;
 import com.caac.weeklyreport.biz.deptReport.entity.dto.DeptReportWeekDTO;
 import com.caac.weeklyreport.biz.deptReport.entity.vo.DeptReportVO;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * <p>
  * 部门周报表 服务类
@@ -18,6 +20,7 @@ public interface IDeptReportService extends IService<DeptReport> {
     DeptReport saveDeptReport(DeptReportVO deptReportVO);
     DeptReport getWeeklyReportByTime(int year, int week);
     DeptReportWeekDTO getCurrentStatusAndDeptReport(int year, int week);
+    void exportDeptReportExcel(String deptId, int startWeek, int endWeek,int year, HttpServletResponse response);
 //    DeptReport createDeptReport(DeptReport deptReport);
 //    DeptReport getDeptReportById(String id);
 //    List<DeptReport> getAllDeptReports();

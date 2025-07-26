@@ -2,12 +2,15 @@ package com.caac.weeklyreport.biz.teamReport.controller;
 
 import com.caac.weeklyreport.biz.teamReport.entity.vo.TeamReportVO;
 import com.caac.weeklyreport.biz.teamReport.service.ITeamReportService;
+import com.caac.weeklyreport.common.PassToken;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>
@@ -57,6 +60,14 @@ public class TeamReportController {
     public ResultBean<?> getWeeklyReportByTime(@PathVariable int year, @PathVariable int week,@PathVariable String teamId) {
         return ResultBean.success(teamReportService.getWeeklyReportByTime(year, week,teamId));
     }
+
+    @ApiOperation(value = "根据年份和周数获取导出周报数据", notes = "根据年份和周数获取导出周报数据")
+    @PassToken
+    @GetMapping("/exportTeamReportExcel/{teamId}/{startWeek}/{endWeek}/{year}")
+    public void exportTeamReportExcel(@PathVariable String teamId, @PathVariable int startWeek, @PathVariable int endWeek, @PathVariable int year, HttpServletResponse response) {
+        teamReportService.exportTeamReportExcel(teamId,startWeek,endWeek,year,response);
+    }
+
 //
 
 //

@@ -1,19 +1,25 @@
 package com.caac.weeklyreport.biz.deptReport.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.biz.deptReport.entity.DeptReport;
+import com.caac.weeklyreport.biz.deptReport.entity.dto.DeptReportExcelDTO;
 import com.caac.weeklyreport.biz.deptReport.entity.dto.DeptReportWeekDTO;
 import com.caac.weeklyreport.biz.deptReport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.biz.deptReport.mapper.DeptReportMapper;
 import com.caac.weeklyreport.biz.deptReport.service.IDeptReportService;
+import com.caac.weeklyreport.biz.personalReport.entity.dto.PersonalReportExcelDTO;
 import com.caac.weeklyreport.biz.teamReport.entity.TeamReport;
+import com.caac.weeklyreport.biz.teamReport.entity.dto.TeamReportExcelDTO;
 import com.caac.weeklyreport.biz.teamReport.mapper.TeamReportMapper;
 import com.caac.weeklyreport.biz.user.entity.UserInfo;
 import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
+import com.caac.weeklyreport.util.LogBacks;
 import com.caac.weeklyreport.util.UserContext;
 import com.caac.weeklyreport.util.WeekDateUtils;
 import org.springframework.beans.BeanUtils;
@@ -21,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -174,6 +181,30 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
         deptReportWeekDTO.setTeamReports(teamReports);
 
         return deptReportWeekDTO;
+    }
+
+    @Override
+    public void exportDeptReportExcel(String deptId, int startWeek, int endWeek,int year, HttpServletResponse response) {
+        List<DeptReportExcelDTO> resultList  = deptReportMapper.getExportDeptReport(deptId,startWeek,endWeek,year);
+
+        try {
+            //HttpServletResponse消息头参数设置
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Transfer-Encoding", "binary");
+            response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+            response.setHeader("Pragma", "public");
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8");
+            String fileName = "部门周报第"+startWeek+"-"+endWeek+"周报"+ ".xlsx";
+            fileName = new String(fileName.getBytes(), "ISO-8859-1");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName );
+            EasyExcel.write(response.getOutputStream(), PersonalReportExcelDTO.class)
+                    .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 启用自适应
+                    .autoCloseStream(Boolean.FALSE)
+                    .sheet("部门周报")
+                    .doWrite(resultList);
+        } catch (Exception e) {
+            LogBacks.error(e.getMessage());
+        }
     }
 
     public DeptReport getDeptDraftByUserIdAndWeek(String deptId, int week, int year) {

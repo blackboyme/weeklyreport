@@ -64,9 +64,9 @@ public class PersonalReportController {
 
     @ApiOperation(value = "根据年份和周数获取导出周报数据", notes = "根据年份和周数获取导出周报数据")
     @PassToken
-    @GetMapping("/exportPersonalReportExcel/{teamId}/{week}/{year}")
-    public void exportPersonalReportExcel(@PathVariable String teamId, @PathVariable int week, @PathVariable int year, HttpServletResponse response) {
-        personalReportService.exportPersonalReportExcel(teamId,week,year,response);
+    @GetMapping("/exportPersonalReportExcel/{userId}/{startWeek}/{endWeek}/{year}")
+    public void exportPersonalReportExcel(@PathVariable String userId, @PathVariable int startWeek, @PathVariable int endWeek,@PathVariable int year, HttpServletResponse response) {
+        personalReportService.exportPersonalReportExcel(userId,startWeek,endWeek,year,response);
     }
 
 }

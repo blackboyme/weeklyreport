@@ -51,6 +51,10 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
     public PersonalReport savePersonalReportDraft(PersonalReportVO personalReportVO) {
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
+        if("3".equals(userInfo.getRoleType())) {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+
         if(!userInfo.getUserId().equals(personalReportVO.getUserId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
@@ -100,6 +104,9 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
     public PersonalReport submitPersonalReport(PersonalReportVO personalReportVO) {
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
+        if("3".equals(userInfo.getRoleType())) {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
         if(!userInfo.getUserId().equals(personalReportVO.getUserId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
@@ -204,9 +211,8 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
 
 
     @Override
-    public void exportPersonalReportExcel(String teamId, int week, int year, HttpServletResponse response) {
-        List<PersonalReportExcelDTO> resultList  = personalReportMapper.getExportPersonalReport(teamId,
-                week,year);
+    public void exportPersonalReportExcel(String userId, int startWeek, int endWeek,int year, HttpServletResponse response) {
+        List<PersonalReportExcelDTO> resultList  = personalReportMapper.getExportPersonalReport(userId,startWeek,endWeek,year);
 
         try {
             //HttpServletResponse消息头参数设置
@@ -215,13 +221,13 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
             response.setHeader("Pragma", "public");
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8");
-            String fileName = "个人周报第"+week+"周报"+ ".xlsx";
+            String fileName = "个人周报第"+startWeek+"-"+endWeek+"周报"+ ".xlsx";
             fileName = new String(fileName.getBytes(), "ISO-8859-1");
             response.setHeader("Content-Disposition", "attachment;filename=" + fileName );
             EasyExcel.write(response.getOutputStream(), PersonalReportExcelDTO.class)
                     .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 启用自适应
                     .autoCloseStream(Boolean.FALSE)
-                    .sheet("团队周报")
+                    .sheet("个人周报")
                     .doWrite(resultList);
         } catch (Exception e) {
             LogBacks.error(e.getMessage());

@@ -25,10 +25,13 @@ public interface PersonalReportMapper extends BaseMapper<PersonalReport> {
             "construction,special_construction,others,special_others " +
             "FROM personal_report " +
             "WHERE " +
-            "team_id = #{teamId} " +
+            "user_id = #{userId} " +
             "AND year = #{year} " +
-            "AND week = #{week} " +
-            "ORDER BY updated_at")
-    List<PersonalReportExcelDTO> getExportPersonalReport(@Param("teamId")String teamId, @Param("week")int week,
+            "AND week >= #{startWeek} " +
+            "AND week <= #{endWeek} " +
+            "ORDER BY week")
+    List<PersonalReportExcelDTO> getExportPersonalReport(@Param("userId")String userId,
+                                                         @Param("startWeek")int startWeek,
+                                                         @Param("endWeek")int endWeek,
                                                          @Param("year")int year);
 }

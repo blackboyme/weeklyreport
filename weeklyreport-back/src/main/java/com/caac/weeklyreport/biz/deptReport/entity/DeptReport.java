@@ -40,12 +40,6 @@ public class DeptReport implements Serializable {
     @ApiModelProperty(value = "员工名称")
     private String userName;
 
-    @ApiModelProperty(value = "团队ID")
-    private String teamId;
-
-    @ApiModelProperty(value = "团队名称")
-    private String teamName;
-
     @ApiModelProperty(value = "部门ID")
     private String deptId;
 

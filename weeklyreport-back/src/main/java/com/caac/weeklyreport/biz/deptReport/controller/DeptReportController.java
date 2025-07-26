@@ -2,12 +2,15 @@ package com.caac.weeklyreport.biz.deptReport.controller;
 
 import com.caac.weeklyreport.biz.deptReport.entity.vo.DeptReportVO;
 import com.caac.weeklyreport.biz.deptReport.service.IDeptReportService;
+import com.caac.weeklyreport.common.PassToken;
 import com.caac.weeklyreport.common.ResultBean;
 import com.caac.weeklyreport.common.ResultCode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>
@@ -59,16 +62,12 @@ public class DeptReportController {
         return ResultBean.success(deptReportService.getWeeklyReportByTime(year, week));
     }
 
-//
-//    @ApiOperation(value = "根据年份和周数获取当前上周部门周报数据", notes = "根据年份和周数获取当前上周部门周报数据")
-//    @GetMapping("/getLastWeeklyReportByTime/{year}/{week}")
-//    public ResultBean<?> getLastWeeklyReportByTime(@PathVariable int year, @PathVariable int week) {
-//        return ResultBean.success(deptReportService.getLastWeeklyReportByTime(year, week));
-//    }
-//
-
-
-
+    @ApiOperation(value = "根据年份和周数获取导出周报数据", notes = "根据年份和周数获取导出周报数据")
+    @PassToken
+    @GetMapping("/exportTeamReportExcel/{deptId}/{startWeek}/{endWeek}/{year}")
+    public void exportTeamReportExcel(@PathVariable String deptId, @PathVariable int startWeek, @PathVariable int endWeek, @PathVariable int year, HttpServletResponse response) {
+        deptReportService.exportDeptReportExcel(deptId,startWeek,endWeek,year,response);
+    }
 
 
 }

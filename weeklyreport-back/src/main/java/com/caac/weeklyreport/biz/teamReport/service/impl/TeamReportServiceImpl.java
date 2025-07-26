@@ -1,10 +1,14 @@
 package com.caac.weeklyreport.biz.teamReport.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.caac.weeklyreport.biz.personalReport.entity.PersonalReport;
+import com.caac.weeklyreport.biz.personalReport.entity.dto.PersonalReportExcelDTO;
 import com.caac.weeklyreport.biz.personalReport.mapper.PersonalReportMapper;
 import com.caac.weeklyreport.biz.teamReport.entity.TeamReport;
+import com.caac.weeklyreport.biz.teamReport.entity.dto.TeamReportExcelDTO;
 import com.caac.weeklyreport.biz.teamReport.entity.dto.TeamReportWeekDTO;
 import com.caac.weeklyreport.biz.teamReport.entity.vo.TeamReportVO;
 import com.caac.weeklyreport.biz.teamReport.mapper.TeamReportMapper;
@@ -14,6 +18,7 @@ import com.caac.weeklyreport.common.ResultCode;
 import com.caac.weeklyreport.common.enums.CommonConstants;
 import com.caac.weeklyreport.exception.BusinessException;
 import com.caac.weeklyreport.util.KeyGeneratorUtil;
+import com.caac.weeklyreport.util.LogBacks;
 import com.caac.weeklyreport.util.UserContext;
 import com.caac.weeklyreport.util.WeekDateUtils;
 import org.springframework.beans.BeanUtils;
@@ -21,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,6 +52,9 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
     public TeamReport saveTeamReportDraft(TeamReportVO teamReportVO){
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
+        if(!"2".equals(userInfo.getRoleType())) {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
         if(!userInfo.getTeamId().equals(teamReportVO.getTeamId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
@@ -101,6 +110,10 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
     public TeamReport submitTeamReport(TeamReportVO teamReportVO){
         // 不能修改其他人的周报
         UserInfo userInfo = UserContext.getCurrentUser();
+        if(!"2".equals(userInfo.getRoleType())) {
+            throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
+        }
+
         if(!userInfo.getTeamId().equals(teamReportVO.getTeamId())){
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
@@ -253,6 +266,30 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             throw new BusinessException(ResultCode.REPORT_IS_NULL);
         }
         return teamReport;
+    }
+
+    @Override
+    public void exportTeamReportExcel(String teamId, int startWeek, int endWeek,int year, HttpServletResponse response) {
+        List<TeamReportExcelDTO> resultList  = teamReportMapper.getExportTeamReport(teamId,startWeek,endWeek,year);
+
+        try {
+            //HttpServletResponse消息头参数设置
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Transfer-Encoding", "binary");
+            response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+            response.setHeader("Pragma", "public");
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8");
+            String fileName = "团队周报第"+startWeek+"-"+endWeek+"周报"+ ".xlsx";
+            fileName = new String(fileName.getBytes(), "ISO-8859-1");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName );
+            EasyExcel.write(response.getOutputStream(), PersonalReportExcelDTO.class)
+                    .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 启用自适应
+                    .autoCloseStream(Boolean.FALSE)
+                    .sheet("团队周报")
+                    .doWrite(resultList);
+        } catch (Exception e) {
+            LogBacks.error(e.getMessage());
+        }
     }
 
     public TeamReport getTeamDraftByUserIdAndWeek(String teamId, int week, int year)  {
