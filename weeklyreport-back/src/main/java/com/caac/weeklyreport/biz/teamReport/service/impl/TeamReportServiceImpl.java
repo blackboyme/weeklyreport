@@ -54,7 +54,10 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReportVO.getTeamId(), teamReportVO.getWeek(), LocalDate.now().getYear());
+        int week = teamReportVO.getWeek();
+        int year = teamReportVO.getYear();
+
+        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReportVO.getTeamId(), week, year);
 
         if (existingDraft != null) {
             // 当前状态为已通过审批，不能修改
@@ -80,8 +83,8 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             teamReport.setTeamName(userInfo.getTeamName());
             teamReport.setDeptId(userInfo.getDeptId());
             teamReport.setDeptName(userInfo.getDeptName());
-            teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(teamReport.getWeek()));
-            teamReport.setEndDate(WeekDateUtils.getEndDateOfWeek(teamReport.getWeek()));
+            teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(week,year));
+            teamReport.setEndDate(WeekDateUtils.getEndDateOfWeek(week,year));
             teamReport.setCreatedAt(LocalDateTime.now());
             teamReport.setUpdatedAt(LocalDateTime.now());
             teamReport.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
@@ -106,7 +109,10 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReportVO.getTeamId(), teamReportVO.getWeek(), LocalDate.now().getYear());
+        int week = teamReportVO.getWeek();
+        int year = teamReportVO.getYear();
+
+        TeamReport existingDraft = getTeamDraftByUserIdAndWeek(teamReportVO.getTeamId(), week, year);
 
         if (existingDraft != null) {
             // 当前状态为已通过审批，不能修改
@@ -133,8 +139,8 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             teamReport.setTeamName(userInfo.getTeamName());
             teamReport.setDeptId(userInfo.getDeptId());
             teamReport.setDeptName(userInfo.getDeptName());
-            teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(teamReport.getWeek()));
-            teamReport.setEndDate(WeekDateUtils.getEndDateOfWeek(teamReport.getWeek()));
+            teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(week,year));
+            teamReport.setEndDate(WeekDateUtils.getEndDateOfWeek(week,year));
             teamReport.setCreatedAt(LocalDateTime.now());
             teamReport.setUpdatedAt(LocalDateTime.now());
             teamReport.setCurrentStatus(CommonConstants.CURRENT_STATUS_SUBMIT);

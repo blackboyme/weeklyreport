@@ -16,6 +16,10 @@ public class DeptReportVO {
     @TableField("week")
     private Integer week;
 
+    @ApiModelProperty(value = "年")
+    @TableField("year")
+    private Integer year;
+
     @ApiModelProperty(value = "本周主要工作")
     @TableField("summary")
     private String summary;

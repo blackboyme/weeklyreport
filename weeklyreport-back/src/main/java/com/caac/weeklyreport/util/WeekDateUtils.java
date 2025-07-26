@@ -13,8 +13,8 @@ public class WeekDateUtils {
      * @return 该周周一的LocalDateTime对象（时间部分为00:00:00）
      * @throws IllegalArgumentException 如果周数不在有效范围内
      */
-    public static LocalDateTime getStartDateOfWeek(int weekNumber) {
-        return getWeekDate(weekNumber, 1).withHour(0).withMinute(0).withSecond(0);
+    public static LocalDateTime getStartDateOfWeek(int weekNumber,int year) {
+        return getWeekDate(weekNumber, 1,year).withHour(0).withMinute(0).withSecond(0);
     }
 
     /**
@@ -23,13 +23,11 @@ public class WeekDateUtils {
      * @return 该周周日的LocalDateTime对象（时间部分为23:59:59.999999999）
      * @throws IllegalArgumentException 如果周数不在有效范围内
      */
-    public static LocalDateTime getEndDateOfWeek(int weekNumber) {
-        return getWeekDate(weekNumber, 7).withHour(23).withMinute(59).withSecond(59);
+    public static LocalDateTime getEndDateOfWeek(int weekNumber,int year) {
+        return getWeekDate(weekNumber, 7,year).withHour(23).withMinute(59).withSecond(59);
     }
 
-    private static LocalDateTime getWeekDate(int weekNumber, long dayOfWeek) {
-        // 获取当前年份
-        int year = LocalDate.now().getYear();
+    private static LocalDateTime getWeekDate(int weekNumber, long dayOfWeek,int year) {
 
         // 验证周数是否有效
         LocalDate firstDayOfYear = LocalDate.of(year, 1, 1);
@@ -81,10 +79,10 @@ public class WeekDateUtils {
         // 测试示例
         int testWeek = getCurrentWeekNumber();
 
-        LocalDateTime startDate = getStartDateOfWeek(testWeek);
+        LocalDateTime startDate = getStartDateOfWeek(testWeek,2025);
         System.out.println("第" + testWeek + "周的开始日期是: " + startDate);
 
-        LocalDateTime endDate = getEndDateOfWeek(testWeek);
+        LocalDateTime endDate = getEndDateOfWeek(testWeek,2025);
         System.out.println("第" + testWeek + "周的结束日期是: " + endDate);
     }
 }

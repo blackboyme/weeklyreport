@@ -53,7 +53,10 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), deptReportVO.getWeek(), LocalDate.now().getYear());
+        int week = deptReportVO.getWeek();
+        int year = deptReportVO.getYear();
+
+        DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), week, year);
 
         if (existingDraft != null) {
             BeanUtils.copyProperties(deptReportVO, existingDraft);
@@ -73,8 +76,8 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             deptReport.setUserName(userInfo.getUserName());
             deptReport.setDeptId(userInfo.getDeptId());
             deptReport.setDeptName(userInfo.getDeptName());
-            deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(deptReport.getWeek()));
-            deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(deptReport.getWeek()));
+            deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(week,year));
+            deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(week,year));
             deptReport.setCreatedAt(LocalDateTime.now());
             deptReport.setUpdatedAt(LocalDateTime.now());
             deptReport.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
@@ -95,7 +98,10 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), deptReportVO.getWeek(), LocalDate.now().getYear());
+        int week = deptReportVO.getWeek();
+        int year = deptReportVO.getYear();
+
+        DeptReport existingDraft = getDeptDraftByUserIdAndWeek(deptReportVO.getDeptId(), week, year);
 
         if (existingDraft != null) {
             BeanUtils.copyProperties(deptReportVO, existingDraft);
@@ -115,8 +121,8 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             deptReport.setUserName(userInfo.getUserName());
             deptReport.setDeptId(userInfo.getDeptId());
             deptReport.setDeptName(userInfo.getDeptName());
-            deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(deptReport.getWeek()));
-            deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(deptReport.getWeek()));
+            deptReport.setStartDate(WeekDateUtils.getStartDateOfWeek(week,year));
+            deptReport.setEndDate(WeekDateUtils.getEndDateOfWeek(week,year));
             deptReport.setCreatedAt(LocalDateTime.now());
             deptReport.setUpdatedAt(LocalDateTime.now());
             deptReport.setCurrentStatus(CommonConstants.CURRENT_STATUS_SUBMIT);

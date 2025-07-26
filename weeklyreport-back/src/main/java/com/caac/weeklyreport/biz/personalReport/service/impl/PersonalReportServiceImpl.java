@@ -49,7 +49,10 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReportVO.getUserId(), personalReportVO.getWeek(), LocalDate.now().getYear());
+        int week = personalReportVO.getWeek();
+        int year = personalReportVO.getYear();
+
+        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReportVO.getUserId(), week,year);
 
         if (existingDraft != null) {
             if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(existingDraft.getCurrentStatus())) {
@@ -74,8 +77,8 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             }
             personalReport.setDeptId(userInfo.getDeptId());
             personalReport.setDeptName(userInfo.getDeptName());
-            personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
-            personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
+            personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(week,year));
+            personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(week,year));
             personalReport.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
             personalReport.setCreatedAt(LocalDateTime.now());
             personalReport.setUpdatedAt(LocalDateTime.now());
@@ -95,7 +98,10 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             throw new BusinessException(ResultCode.ACCESS_ILLEGAL);
         }
 
-        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReportVO.getUserId(), personalReportVO.getWeek(),LocalDate.now().getYear());
+        int week = personalReportVO.getWeek();
+        int year = personalReportVO.getYear();
+
+        PersonalReport existingDraft = getDraftByUserIdAndWeek(personalReportVO.getUserId(), week,year);
 
         if (existingDraft != null) {
             if (CommonConstants.CURRENT_STATUS_SUBMIT.equals(existingDraft.getCurrentStatus())) {
@@ -121,8 +127,8 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             }
             personalReport.setDeptId(userInfo.getDeptId());
             personalReport.setDeptName(userInfo.getDeptName());
-            personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(personalReport.getWeek()));
-            personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(personalReport.getWeek()));
+            personalReport.setStartDate(WeekDateUtils.getStartDateOfWeek(week,year));
+            personalReport.setEndDate(WeekDateUtils.getEndDateOfWeek(week,year));
             personalReport.setCurrentStatus(CommonConstants.CURRENT_STATUS_SUBMIT);
             personalReport.setCreatedAt(LocalDateTime.now());
             personalReport.setUpdatedAt(LocalDateTime.now());

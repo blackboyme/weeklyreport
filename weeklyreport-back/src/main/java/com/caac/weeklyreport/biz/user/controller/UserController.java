@@ -3,6 +3,7 @@ package com.caac.weeklyreport.biz.user.controller;
 import cn.binarywang.wx.miniapp.api.WxMaUserService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import com.caac.weeklyreport.biz.user.entity.UserInfo;
+import com.caac.weeklyreport.biz.user.entity.vo.LoginAutoVO;
 import com.caac.weeklyreport.biz.user.entity.vo.LoginVO;
 import com.caac.weeklyreport.biz.user.service.UserService;
 import com.caac.weeklyreport.common.ResultBean;
@@ -42,14 +43,11 @@ public class UserController {
 
     @ApiOperation(value = "自行登录", tags = "登录")
     @PostMapping("/login")
-    public ResultBean<?> login(@RequestBody Map<String, String> loginRequest) {
-        String phoneNo = loginRequest.get("phoneNo");
-        
-        if (StringUtils.isEmpty(phoneNo)) {
+    public ResultBean<?> login(@RequestBody LoginAutoVO vo) {
+        if (StringUtils.isEmpty(vo.getOpenId())) {
             return ResultBean.fail(ResultCode.PARAM_IS_NULL);
         }
-        String openId = "openId";
-        UserInfo userInfo = userService.login(phoneNo,openId);
+        UserInfo userInfo = userService.login(vo.getPhoneNo(),vo.getOpenId());
         if (userInfo == null) {
             return ResultBean.fail("登录失败：用户不存在");
         }
