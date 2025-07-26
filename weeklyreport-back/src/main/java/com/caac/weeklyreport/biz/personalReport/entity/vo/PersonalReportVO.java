@@ -22,12 +22,12 @@ public class PersonalReportVO {
     private Integer year;
 
     @ApiModelProperty(value = "本周主要工作")
-    @TableField("primary")
-    private String primary;
+    @TableField("major")
+    private String major;
 
     @ApiModelProperty(value = "本周主要工作特殊说明")
-    @TableField("special_primary")
-    private String specialPrimary;
+    @TableField("special_major")
+    private String specialMajor;
 
     @ApiModelProperty(value = "本周示范区建设")
     @TableField("construction")
@@ -46,12 +46,12 @@ public class PersonalReportVO {
     private String specialOthers;
 
     @ApiModelProperty(value = "下周主要工作")
-    @TableField("next_primary")
-    private String nextPrimary;
+    @TableField("next_major")
+    private String nextMajor;
 
     @ApiModelProperty(value = "下周主要工作特殊说明")
-    @TableField("next_special_primary")
-    private String nextSpecialPrimary;
+    @TableField("next_special_major")
+    private String nextSpecialMajor;
 
     @ApiModelProperty(value = "下周示范区建设")
     @TableField("next_construction")

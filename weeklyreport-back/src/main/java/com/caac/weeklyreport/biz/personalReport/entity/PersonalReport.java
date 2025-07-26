@@ -1,17 +1,16 @@
 package com.caac.weeklyreport.biz.personalReport.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.IdType;
+import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.TableId;
+import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -19,7 +18,7 @@ import java.time.LocalDateTime;
  * </p>
  *
  * @author hanrenjie
- * @since 2025-07-24
+ * @since 2025-07-26
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -70,17 +69,17 @@ public class PersonalReport implements Serializable {
     @TableField("week")
     private Integer week;
 
-    @ApiModelProperty(value = "周数")
+    @ApiModelProperty(value = "年")
     @TableField("year")
     private Integer year;
 
     @ApiModelProperty(value = "本周主要工作")
-    @TableField("primary")
-    private String primary;
+    @TableField("major")
+    private String major;
 
     @ApiModelProperty(value = "本周主要工作特殊说明")
-    @TableField("special_primary")
-    private String specialPrimary;
+    @TableField("special_major")
+    private String specialMajor;
 
     @ApiModelProperty(value = "本周示范区建设")
     @TableField("construction")
@@ -99,12 +98,12 @@ public class PersonalReport implements Serializable {
     private String specialOthers;
 
     @ApiModelProperty(value = "下周主要工作")
-    @TableField("next_primary")
-    private String nextPrimary;
+    @TableField("next_major")
+    private String nextMajor;
 
     @ApiModelProperty(value = "下周主要工作特殊说明")
-    @TableField("next_special_primary")
-    private String nextSpecialPrimary;
+    @TableField("next_special_major")
+    private String nextSpecialMajor;
 
     @ApiModelProperty(value = "下周示范区建设")
     @TableField("next_construction")

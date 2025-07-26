@@ -17,7 +17,7 @@ import com.caac.weeklyreport.biz.personalReport.entity.vo.PersonalReportVO;
 public interface IPersonalReportService extends IService<PersonalReport> {
     PersonalReport savePersonalReportDraft(PersonalReportVO personalReport);
     PersonalReport submitPersonalReport(PersonalReportVO personalReport);
-    PersonalReportWeekDTO getCurrentStatusAndWeeklyReport();
+    PersonalReportWeekDTO getCurrentStatusAndWeeklyReport(int year, int week);
     PersonalReport getWeeklyReportByTime(int year, int week);
     //    PersonalReport updatePersonalReport(PersonalReport personalReport);
 //    List<PersonalReport> getAllPersonalReports();

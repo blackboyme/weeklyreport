@@ -140,11 +140,10 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
     }
 
     @Override
-    public PersonalReportWeekDTO getCurrentStatusAndWeeklyReport() {
+    public PersonalReportWeekDTO getCurrentStatusAndWeeklyReport(int year, int week) {
         PersonalReportWeekDTO personalReportWeekDTO = new PersonalReportWeekDTO();
         UserInfo userInfo = UserContext.getCurrentUser();
-        int currentWeek =  WeekDateUtils.getCurrentWeekNumber();
-        PersonalReport currentPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek,LocalDate.now().getYear());
+        PersonalReport currentPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), week, year);
         if(currentPersonalReport == null){
             personalReportWeekDTO.setCurrentStatus(CommonConstants.CURRENT_STATUS_DRAFT);
         } else {
@@ -160,11 +159,11 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
         }
 
         PersonalReport lastWeekPersonalReport = null;
-        if (currentWeek == 1) {
+        if (week == 1) {
             int lastYearTotalWeek = WeekDateUtils.getTotalWeeksInYear(LocalDate.now().getYear()-1);
-            lastWeekPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), lastYearTotalWeek, LocalDate.now().getYear()-1);
+            lastWeekPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), lastYearTotalWeek, year-1);
         } else {
-            lastWeekPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), currentWeek-1, LocalDate.now().getYear());
+            lastWeekPersonalReport = getDraftByUserIdAndWeek(userInfo.getUserId(), week-1, year);
         }
         personalReportWeekDTO.setLastWeekPersonalReport(lastWeekPersonalReport);
         personalReportWeekDTO.setTeamTitle(userInfo.getTeamTitle());

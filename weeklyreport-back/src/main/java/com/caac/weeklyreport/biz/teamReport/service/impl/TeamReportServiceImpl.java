@@ -190,14 +190,14 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
                 .eq("year", currentWeek);
         List<PersonalReport> personalReports = personalReportMapper.selectList(queryWrapper);
         // 封装拼接数据
-        StringBuilder primary =  new StringBuilder();
-        StringBuilder specialPrimary = new StringBuilder();
+        StringBuilder major =  new StringBuilder();
+        StringBuilder specialMajor = new StringBuilder();
         StringBuilder construction = new StringBuilder();
         StringBuilder specialConstruction = new StringBuilder();
         StringBuilder others = new StringBuilder();
         StringBuilder specialOthers = new StringBuilder();
-        StringBuilder nextPrimary= new StringBuilder();
-        StringBuilder nextSpecialPrimary = new StringBuilder();
+        StringBuilder nextMajor= new StringBuilder();
+        StringBuilder nextSpecialMajor = new StringBuilder();
         StringBuilder nextConstruction = new StringBuilder();
         StringBuilder nextSpecialConstruction = new StringBuilder();
         StringBuilder nextOthers = new StringBuilder();
@@ -210,14 +210,14 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
                 boolean isLast = (personalReports.size() == 1 || i == personalReports.size() - 1);
                 String separator = isLast ? "" : System.lineSeparator();
 
-                appendIfNotEmpty(primary, report.getPrimary(), userNamePart, separator);
-                appendIfNotEmpty(specialPrimary, report.getSpecialPrimary(), userNamePart, separator);
+                appendIfNotEmpty(major, report.getMajor(), userNamePart, separator);
+                appendIfNotEmpty(specialMajor, report.getSpecialMajor(), userNamePart, separator);
                 appendIfNotEmpty(construction, report.getConstruction(), userNamePart, separator);
                 appendIfNotEmpty(specialConstruction, report.getSpecialConstruction(), userNamePart, separator);
                 appendIfNotEmpty(others, report.getOthers(), userNamePart, separator);
                 appendIfNotEmpty(specialOthers, report.getSpecialOthers(), userNamePart, separator);
-                appendIfNotEmpty(nextPrimary, report.getNextPrimary(), userNamePart, separator);
-                appendIfNotEmpty(nextSpecialPrimary, report.getNextSpecialPrimary(), userNamePart, separator);
+                appendIfNotEmpty(nextMajor, report.getNextMajor(), userNamePart, separator);
+                appendIfNotEmpty(nextSpecialMajor, report.getNextSpecialMajor(), userNamePart, separator);
                 appendIfNotEmpty(nextConstruction, report.getNextConstruction(), userNamePart, separator);
                 appendIfNotEmpty(nextSpecialConstruction, report.getNextSpecialConstruction(), userNamePart, separator);
                 appendIfNotEmpty(nextOthers, report.getNextOthers(), userNamePart, separator);
@@ -225,14 +225,14 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             }
 
             PersonalReport currentWeekPersonalReport = new PersonalReport();
-            currentWeekPersonalReport.setPrimary(primary.toString());
-            currentWeekPersonalReport.setSpecialPrimary(specialPrimary.toString());
+            currentWeekPersonalReport.setMajor(major.toString());
+            currentWeekPersonalReport.setSpecialMajor(specialMajor.toString());
             currentWeekPersonalReport.setConstruction(construction.toString());
             currentWeekPersonalReport.setSpecialConstruction(specialConstruction.toString());
             currentWeekPersonalReport.setOthers(others.toString());
             currentWeekPersonalReport.setSpecialOthers(specialOthers.toString());
-            currentWeekPersonalReport.setNextPrimary(nextPrimary.toString());
-            currentWeekPersonalReport.setNextSpecialPrimary(nextSpecialPrimary.toString());
+            currentWeekPersonalReport.setNextMajor(nextMajor.toString());
+            currentWeekPersonalReport.setNextSpecialMajor(nextSpecialMajor.toString());
             currentWeekPersonalReport.setNextConstruction(nextConstruction.toString());
             currentWeekPersonalReport.setNextSpecialConstruction(nextSpecialConstruction.toString());
             currentWeekPersonalReport.setNextOthers(nextOthers.toString());

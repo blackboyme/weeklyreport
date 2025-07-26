@@ -47,9 +47,9 @@ public class PersonalReportController {
     }
 
     @ApiOperation(value = "员工周报填写-获取当前状态和周报数据", notes = "员工周报填写-获取当前状态和周报数据")
-    @GetMapping("/getCurrentStatusAndWeeklyReport")
-    public ResultBean<?> getCurrentStatusAndWeeklyReport() {
-        return ResultBean.success(personalReportService.getCurrentStatusAndWeeklyReport());
+    @GetMapping("/getCurrentStatusAndWeeklyReport/{year}/{week}")
+    public ResultBean<?> getCurrentStatusAndWeeklyReport(@PathVariable int year, @PathVariable int week) {
+        return ResultBean.success(personalReportService.getCurrentStatusAndWeeklyReport(year,week));
     }
 
 
