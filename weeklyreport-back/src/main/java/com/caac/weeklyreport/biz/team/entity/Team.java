@@ -1,13 +1,11 @@
 package com.caac.weeklyreport.biz.team.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.IdType;
 import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.TableId;
+import java.io.Serializable;
 
 /**
  * <p>
@@ -15,7 +13,7 @@ import java.time.LocalDateTime;
  * </p>
  *
  * @author hanrenjie
- * @since 2025-06-22
+ * @since 2025-07-26
  */
 @TableName("team")
 public class Team implements Serializable {
@@ -43,8 +41,8 @@ public class Team implements Serializable {
     /**
      * 部门名称
      */
-    @TableField("depart_name")
-    private String departName;
+    @TableField("dept_name")
+    private String deptName;
 
     /**
      * 填写标题
@@ -56,14 +54,12 @@ public class Team implements Serializable {
      * 创建时间
      */
     @TableField("created_at")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /**
      * 更新时间
      */
     @TableField("updated_at")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private LocalDateTime updatedAt;
 
     /**
@@ -86,12 +82,26 @@ public class Team implements Serializable {
     public void setTeamName(String teamName) {
         this.teamName = teamName;
     }
-    public String getDepartName() {
-        return departName;
+    public String getDeptId() {
+        return deptId;
     }
 
-    public void setDepartName(String departName) {
-        this.departName = departName;
+    public void setDeptId(String deptId) {
+        this.deptId = deptId;
+    }
+    public String getDeptName() {
+        return deptName;
+    }
+
+    public void setDeptName(String deptName) {
+        this.deptName = deptName;
+    }
+    public String getTeamTitle() {
+        return teamTitle;
+    }
+
+    public void setTeamTitle(String teamTitle) {
+        this.teamTitle = teamTitle;
     }
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -115,28 +125,13 @@ public class Team implements Serializable {
         this.isDeleted = isDeleted;
     }
 
-    public String getTeamTitle() {
-        return teamTitle;
-    }
-
-    public void setTeamTitle(String teamTitle) {
-        this.teamTitle = teamTitle;
-    }
-
-    public String getDeptId() {
-        return deptId;
-    }
-
-    public void setDeptId(String deptId) {
-        this.deptId = deptId;
-    }
     @Override
     public String toString() {
         return "Team{" +
             "teamId=" + teamId +
             ", teamName=" + teamName +
             ", deptId=" + deptId +
-            ", departName=" + departName +
+            ", deptName=" + deptName +
             ", teamTitle=" + teamTitle +
             ", createdAt=" + createdAt +
             ", updatedAt=" + updatedAt +
