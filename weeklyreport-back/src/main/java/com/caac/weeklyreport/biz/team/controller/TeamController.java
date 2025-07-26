@@ -8,6 +8,7 @@ import com.caac.weeklyreport.common.ResultBean;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,5 +38,11 @@ public class TeamController {
     public ResultBean<?> getAllTeams() {
         List<Team> teams = teamServiceImpl.getAllTeams();
         return ResultBean.success(teams);
+    }
+
+    @ApiOperation("获取部门所有团队")
+    @GetMapping("/getAllTeamsByDeptId/{deptId}")
+    public ResultBean<?> getAllTeamsByDeptId(@PathVariable String deptId) {
+        return ResultBean.success(teamServiceImpl.getAllTeamsByDeptId(deptId));
     }
 }

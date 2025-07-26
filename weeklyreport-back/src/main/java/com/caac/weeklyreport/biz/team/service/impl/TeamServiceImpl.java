@@ -34,6 +34,14 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements IT
     }
 
     @Override
+    public List<Team> getAllTeamsByDeptId(String deptId) {
+        QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("dept_id", deptId)
+                .eq("is_deleted", "0");
+        return teamMapper.selectList(queryWrapper);
+    }
+
+    @Override
     public Team getTeamByTeamId(String teamId) {
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("team_id", teamId)

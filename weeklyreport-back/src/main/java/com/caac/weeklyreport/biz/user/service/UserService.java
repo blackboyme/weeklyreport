@@ -15,4 +15,6 @@ public interface UserService extends IService<User> {
     UserInfo login(String phoneNo,String openId);
     UserInfo validateUserByToken(String token);
     String refreshToken(String oldToken);
+    List<User> getAllUserByTeamId(String teamId);
+    List<User> getAllUser();
 }

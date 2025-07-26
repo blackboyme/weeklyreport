@@ -171,4 +171,16 @@ public class UserController {
             return ResultBean.fail("无效的token");
         }
     }
+
+    @ApiOperation(value = "获取团队所有用户", tags = "用户管理")
+    @PostMapping("/getAllUserByTeamId/{teamId}")
+    public ResultBean<?> getAllUserByTeamId(@PathVariable String teamId) {
+        return ResultBean.success(userService.getAllUserByTeamId(teamId));
+    }
+
+    @ApiOperation(value = "获取所有用户", tags = "用户管理")
+    @PostMapping("/getAllUser")
+    public ResultBean<?> getAllUser() {
+        return ResultBean.success(userService.getAllUser());
+    }
 }

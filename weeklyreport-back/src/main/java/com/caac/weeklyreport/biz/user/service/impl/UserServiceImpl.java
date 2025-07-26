@@ -120,4 +120,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return null;
     }
+
+    @Override
+    public List<User> getAllUserByTeamId(String teamId) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("is_deleted", "0")
+                .eq("team_id", teamId);
+        queryWrapper.select("user_id","user_name","team_id","dept_id");
+        return userMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public List<User> getAllUser() {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("is_deleted", "0");
+        queryWrapper.select("user_id","user_name","team_id","dept_id");
+        return userMapper.selectList(queryWrapper);
+    }
 }

@@ -15,5 +15,6 @@ import java.util.List;
  */
 public interface ITeamService extends IService<Team> {
     List<Team> getAllTeams();
+    List<Team> getAllTeamsByDeptId(String deptId);
     Team getTeamByTeamId(String teamId);
 }
