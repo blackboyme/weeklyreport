@@ -64,8 +64,8 @@ public class DeptReportController {
 
     @ApiOperation(value = "根据年份和周数获取导出周报数据", notes = "根据年份和周数获取导出周报数据")
     @PassToken
-    @GetMapping("/exportTeamReportExcel/{deptId}/{startWeek}/{endWeek}/{year}")
-    public void exportTeamReportExcel(@PathVariable String deptId, @PathVariable int startWeek, @PathVariable int endWeek, @PathVariable int year, HttpServletResponse response) {
+    @GetMapping("/exportDeptReportExcel/{deptId}/{startWeek}/{endWeek}/{year}")
+    public void exportDeptReportExcel(@PathVariable String deptId, @PathVariable int startWeek, @PathVariable int endWeek, @PathVariable int year, HttpServletResponse response) {
         deptReportService.exportDeptReportExcel(deptId,startWeek,endWeek,year,response);
     }
 
