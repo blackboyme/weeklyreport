@@ -20,7 +20,7 @@ import java.util.List;
 public interface DeptReportMapper extends BaseMapper<DeptReport> {
     @Select("SELECT " +
             "dept_name,start_date, end_date, year, week, summary " +
-            "FROM team_report " +
+            "FROM dept_report " +
             "WHERE " +
             "dept_id = #{deptId} " +
             "AND year = #{year} " +

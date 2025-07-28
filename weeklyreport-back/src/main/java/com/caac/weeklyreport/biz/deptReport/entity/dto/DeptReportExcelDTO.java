@@ -42,7 +42,7 @@ public class DeptReportExcelDTO {
     @TableField("week")
     private int week;
 
-    @ExcelProperty("团队重点工作汇总")
+    @ExcelProperty("部门重点工作汇总")
     @TableField("summary")
     private String summary;
 }
