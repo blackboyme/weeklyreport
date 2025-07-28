@@ -90,6 +90,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             teamReport.setUserName(userInfo.getUserName());
             teamReport.setTeamId(userInfo.getTeamId());
             teamReport.setTeamName(userInfo.getTeamName());
+            teamReport.setTeamTitle(userInfo.getTeamTitle());
             teamReport.setDeptId(userInfo.getDeptId());
             teamReport.setDeptName(userInfo.getDeptName());
             teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(week,year));
@@ -150,6 +151,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             teamReport.setUserName(userInfo.getUserName());
             teamReport.setTeamId(userInfo.getTeamId());
             teamReport.setTeamName(userInfo.getTeamName());
+            teamReport.setTeamTitle(userInfo.getTeamTitle());
             teamReport.setDeptId(userInfo.getDeptId());
             teamReport.setDeptName(userInfo.getDeptName());
             teamReport.setStartDate(WeekDateUtils.getStartDateOfWeek(week,year));
@@ -282,7 +284,7 @@ public class TeamReportServiceImpl extends ServiceImpl<TeamReportMapper, TeamRep
             String fileName = "团队周报第"+startWeek+"-"+endWeek+"周报"+ ".xlsx";
             fileName = new String(fileName.getBytes(), "ISO-8859-1");
             response.setHeader("Content-Disposition", "attachment;filename=" + fileName );
-            EasyExcel.write(response.getOutputStream(), PersonalReportExcelDTO.class)
+            EasyExcel.write(response.getOutputStream(), TeamReportExcelDTO.class)
                     .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 启用自适应
                     .autoCloseStream(Boolean.FALSE)
                     .sheet("团队周报")

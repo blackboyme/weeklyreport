@@ -84,6 +84,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             if("1".equals(userInfo.getRoleType()) || "2".equals(userInfo.getRoleType())) {
                 personalReport.setTeamId(userInfo.getTeamId());
                 personalReport.setTeamName(userInfo.getTeamName());
+                personalReport.setTeamTitle(userInfo.getTeamTitle());
             }
             personalReport.setDeptId(userInfo.getDeptId());
             personalReport.setDeptName(userInfo.getDeptName());
@@ -137,6 +138,7 @@ public class PersonalReportServiceImpl extends ServiceImpl<PersonalReportMapper,
             if("1".equals(userInfo.getRoleType()) || "2".equals(userInfo.getRoleType())) {
                 personalReport.setTeamId(userInfo.getTeamId());
                 personalReport.setTeamName(userInfo.getTeamName());
+                personalReport.setTeamTitle(userInfo.getTeamTitle());
             }
             personalReport.setDeptId(userInfo.getDeptId());
             personalReport.setDeptName(userInfo.getDeptName());

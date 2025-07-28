@@ -1,17 +1,16 @@
 package com.caac.weeklyreport.biz.teamReport.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.IdType;
+import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.TableId;
+import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -19,7 +18,7 @@ import java.time.LocalDateTime;
  * </p>
  *
  * @author hanrenjie
- * @since 2025-07-24
+ * @since 2025-07-28
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -50,6 +49,10 @@ public class TeamReport implements Serializable {
     @TableField("team_name")
     private String teamName;
 
+    @ApiModelProperty(value = "标题")
+    @TableField("team_title")
+    private String teamTitle;
+
     @ApiModelProperty(value = "部门ID")
     @TableField("dept_id")
     private String deptId;
@@ -70,7 +73,7 @@ public class TeamReport implements Serializable {
     @TableField("week")
     private Integer week;
 
-    @ApiModelProperty(value = "周数")
+    @ApiModelProperty(value = "年")
     @TableField("year")
     private Integer year;
 

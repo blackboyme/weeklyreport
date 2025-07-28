@@ -175,7 +175,7 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
         queryWrapper.eq("dept_id", userInfo.getDeptId())
                 .eq("week", week)
                 .eq("is_deleted", "0")
-                .apply("year", year);
+                .eq("year", year);
 
         List<TeamReport> teamReports = teamReportMapper.selectList(queryWrapper);
         deptReportWeekDTO.setTeamReports(teamReports);
@@ -197,7 +197,7 @@ public class DeptReportServiceImpl extends ServiceImpl<DeptReportMapper, DeptRep
             String fileName = "部门周报第"+startWeek+"-"+endWeek+"周报"+ ".xlsx";
             fileName = new String(fileName.getBytes(), "ISO-8859-1");
             response.setHeader("Content-Disposition", "attachment;filename=" + fileName );
-            EasyExcel.write(response.getOutputStream(), PersonalReportExcelDTO.class)
+            EasyExcel.write(response.getOutputStream(), DeptReportExcelDTO.class)
                     .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 启用自适应
                     .autoCloseStream(Boolean.FALSE)
                     .sheet("部门周报")

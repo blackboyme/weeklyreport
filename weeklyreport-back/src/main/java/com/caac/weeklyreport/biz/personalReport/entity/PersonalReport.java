@@ -49,6 +49,10 @@ public class PersonalReport implements Serializable {
     @TableField("team_name")
     private String teamName;
 
+    @ApiModelProperty(value = "标题")
+    @TableField("team_title")
+    private String teamTitle;
+
     @ApiModelProperty(value = "部门ID")
     @TableField("dept_id")
     private String deptId;
